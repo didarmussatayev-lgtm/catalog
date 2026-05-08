@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UNIVERMAG Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --tg-theme-button-color: #007aff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+        
+        /* Слева — узкие категории */
+        #categories { width: 100px; background: #fff; border-right: 1px solid #dcdcdc; overflow-y: auto; flex-shrink: 0; }
+        .cat-item { padding: 12px 8px; font-size: 11px; text-align: center; border-bottom: 1px solid #f0f0f0; cursor: pointer; color: #333; text-transform: uppercase; font-weight: 600; }
+        .cat-item.active { background: var(--tg-theme-button-color); color: white; }
+
+        /* Центр — поиск и список */
+        #main { flex-grow: 1; display: flex; flex-direction: column; background: #f0f2f5; }
+        .search-box { padding: 10px; background: #fff; border-bottom: 1px solid #ddd; }
+        .search-box input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none; box-sizing: border-box; font-size: 14px; }
+        
+        #product-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .product-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .product-info h4 { margin: 0; font-size: 14px; color: #222; }
+        .product-info span { color: var(--tg-theme-button-color); font-weight: bold; font-size: 16px; display: block; margin-top: 4px; }
+        
+        .add-btn { background: #eef2ff; color: var(--tg-theme-button-color); border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div id="categories"></div>
+
+<div id="main">
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Поиск в UNIVERMAG..." oninput="handleSearch()">
+    </div>
+    <div id="product-list"></div>
+</div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let catalog = []; // Все данные
+    let currentItems = []; // Текущий вид
+    let cart = {};
+
+    // Загрузка данных из вашего n8n на Railway
+    async function init() {
+        const res = await fetch('https://ВАШ_N8N_URL/webhook/get-catalog');
+        const data = await res.json();
+        catalog = data.item_groups;
+        renderCategories();
+        renderProducts(catalog[0].items); // Показываем первую категорию сразу
+    }
+
+    function renderCategories() {
+        const catContainer = document.getElementById('categories');
+        catalog.forEach((group, idx) => {
+            const div = document.createElement('div');
+            div.className = 'cat-item';
+            div.innerText = group.name;
+            div.onclick = () => {
+                document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+                div.classList.add('active');
+                renderProducts(group.items);
+            };
+            catContainer.appendChild(div);
+        });
+    }
+
+    function renderProducts(items) {
+        const list = document.getElementById('product-list');
+        list.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-info">
+                    <h4>${item.name}</h4>
+                    <span>${item.price} ₸</span>
+                </div>
+                <button class="add-btn" onclick="addToCart('${item.id}', '${item.name}', ${item.price})">+</button>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        if (!query) return;
+        
+        // Поиск по всем 47 000 товарам
+        let results = [];
+        catalog.forEach(group => {
+            const matches = group.items.filter(i => i.name.toLowerCase().includes(query));
+            results = [...results, ...matches];
+        });
+        renderProducts(results.slice(0, 50)); // Ограничиваем вывод для скорости
+    }
+
+    function addToCart(id, name, price) {
+        if (!cart[id]) cart[id] = { name, price, qty: 0 };
+        cart[id].qty++;
+        
+        tg.MainButton.text = `ОФОРМИТЬ ЗАКАЗ (${Object.values(cart).reduce((a,b) => a + b.qty, 0)})`;
+        tg.MainButton.show();
+    }
+
+    tg.onEvent('mainButtonClicked', () => {
+        tg.sendData(JSON.stringify(Object.values(cart))); // Отправляем массив покупок в n8n
+    });
+
+    init();
+</script>
+</body>
+</html>
