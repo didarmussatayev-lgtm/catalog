@@ -8,7 +8,7 @@
         :root { --primary: #4f46e5; --success: #22c55e; --gray: #64748b; }
         body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
         
-        header { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+        header { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;[...]}
         .search-container { flex-grow: 1; margin: 0 10px; }
         .search-container input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .cart-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
@@ -23,11 +23,28 @@
 
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
 
+        /* Планшеты (600px - 1024px) */
+        @media (max-width: 1024px) {
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        }
+
+        /* Мобильные устройства (max 600px) - максимум 2 карточки */
         @media (max-width: 600px) {
-            #sidebar { width: 100px; padding: 5px; }
-            .group-item { font-size: 0.75rem; padding: 8px; }
-            .product-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            body { height: auto; }
+            #sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 8px; overflow-x: auto; overflow-y: visible; white-space: nowrap; }
+            .group-item { display: inline-block; padding: 8px 12px; margin-right: 5px; margin-bottom: 0; font-size: 0.75rem; }
+            #content { padding: 12px; flex: 1; }
+            
+            /* Ключевое изменение: 2 карточки максимум */
+            .product-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 10px; 
+            }
+            
             .search-container { margin: 0 5px; }
+            .card { padding: 10px; }
+            .card div { font-size: 0.75rem; }
+            .add-btn { padding: 8px; font-size: 0.8rem; }
         }
 
         .card { background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; }
@@ -64,7 +81,7 @@
         <div style="text-align:right; margin: 15px 0; font-size: 1.1rem;">Итого: <b id="total-price">0</b> ₸</div>
         <input type="text" id="user_fio" placeholder="Ваше Имя" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
         <input type="tel" id="user_phone" placeholder="Телефон" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
-        <input type="text" id="user_address" placeholder="Адрес доставки (город, улица, дом)" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px; box-sizing: border-box;">
+        <input type="text" id="user_address" placeholder="Адрес доставки (город, улица, дом)" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; [...]
        <div id="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 15px;">
     <div class="modal-body" style="background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 20px;">
         </div>
@@ -271,6 +288,14 @@
             btn.disabled = false;
             btn.innerText = "ОТПРАВИТЬ ЗАКАЗ";
         }
+    }
+
+    function openCart() {
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeCart() {
+        document.getElementById('modal').style.display = 'none';
     }
 </script>
 
