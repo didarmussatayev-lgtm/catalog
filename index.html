@@ -334,7 +334,7 @@
         
         .error-msg.show { display: block; }
         
-        /* Responsive */
+        /* Responsive - Планшеты */
         @media (max-width: 768px) {
             .container { 
                 flex-direction: column; 
@@ -345,25 +345,26 @@
                 height: auto; 
                 border-right: none; 
                 border-bottom: 1px solid #ddd; 
-                padding: 8px;
+                padding: 12px;
                 display: flex;
-                flex-wrap: wrap;
-                gap: 5px;
                 overflow-x: auto;
                 overflow-y: visible;
+                -webkit-overflow-scrolling: touch;
+                gap: 8px;
             }
             .sidebar-item { 
                 flex-shrink: 0;
-                padding: 8px 12px;
+                padding: 10px 14px;
                 margin-bottom: 0;
                 font-size: 13px;
+                white-space: nowrap;
             }
             .content { 
                 height: auto; 
                 padding: 15px; 
             }
             .product-grid { 
-                grid-template-columns: repeat(2, 1fr); 
+                grid-template-columns: repeat(3, 1fr); 
                 gap: 12px; 
             }
             header { 
@@ -406,16 +407,19 @@
             }
         }
         
+        /* Responsive - Мобильные */
         @media (max-width: 600px) {
             header { 
                 padding: 12px 15px; 
                 flex-wrap: wrap;
+                gap: 8px;
             }
             .logo { 
                 font-size: 20px; 
+                flex: 1;
             }
             .search-container { 
-                min-width: 100%;
+                width: 100%;
                 max-width: 100%;
                 order: 3;
             }
@@ -435,7 +439,42 @@
                 padding: 12px 12px; 
                 font-size: 13px; 
             }
+            
+            /* КЛЮЧЕВОЕ: Sidebar горизонтальный с прокруткой */
+            .sidebar { 
+                width: 100%; 
+                height: auto; 
+                border-right: none; 
+                border-bottom: 1px solid #ddd; 
+                padding: 10px;
+                display: flex;
+                overflow-x: auto;
+                overflow-y: visible;
+                -webkit-overflow-scrolling: touch;
+                gap: 6px;
+                background: white;
+            }
+            
+            .sidebar-item { 
+                flex-shrink: 0;
+                padding: 8px 12px;
+                margin-bottom: 0;
+                font-size: 12px;
+                white-space: nowrap;
+                background: var(--light-gray);
+                border-radius: 6px;
+                border-left: none;
+            }
+            
+            .sidebar-item.active { 
+                background: var(--primary);
+                color: white;
+                border-left: none;
+                padding: 8px 12px;
+            }
+            
             .content { 
+                height: auto; 
                 padding: 12px; 
             }
             .product-grid { 
@@ -548,7 +587,6 @@
             const list = document.getElementById('group-list');
             list.innerHTML = catalogData.map((g, i) => 
                 `<div class="sidebar-item" onclick="selectGroup(${i}, this)">
-                    <span class="sidebar-icon">📦</span>
                     <span>${g.name}</span>
                 </div>`
             ).join('');
