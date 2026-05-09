@@ -25,12 +25,37 @@
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
         .qty-ctrl input { width: 50px; text-align: center; }
         .submit-order { background: var(--success); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+   /* Поиск в шапке */
+.search-container { flex-grow: 1; margin: 0 20px; max-width: 400px; }
+.search-container input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; }
+
+/* Анимация полета */
+.flying-item {
+    position: fixed;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #4f46e5;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    z-index: 9999;
+    opacity: 0.8;
+}
+
+/* Кнопка удаления в корзине */
+.remove-btn { color: #ef4444; cursor: pointer; padding: 0 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
     <h2 style="margin:0;">Univermag Shop</h2>
+    <div class="search-container">
+    <input type="text" id="search-input" placeholder="Поиск по названию или штрих-коду..." oninput="filterProducts()">
+</div>
+<button class="cart-btn" id="cart-anchor" onclick="openCart()">
+    🛒 Корзина: <span id="cart-count">0</span>
+</button>
     <button class="cart-btn" onclick="openCart()">🛒 Корзина: <span id="cart-count">0</span></button>
 </header>
 
@@ -84,19 +109,7 @@
         `).join('');
     }
 
-    function renderProducts(index, el) {
-        document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        const group = catalogData[index];
-        document.getElementById('current-category').innerText = group.name;
-        document.getElementById('product-grid').innerHTML = (group.items || []).map(item => `
-            <div class="card">
-                <div style="font-size:0.9rem; font-weight:500;">${item.name}</div>
-                <div style="color:var(--primary); font-weight:bold; margin:10px 0;">${item.price} ₸</div>
-                <button class="add-btn" onclick="addToCart('${item.object_id}', '${item.name}', ${item.price})">Выбрать</button>
-            </div>
-        `).join('');
-    }
+    
 
     function addToCart(id, name, price) {
         if (cart[id]) cart[id].qty++;
@@ -104,22 +117,97 @@
         updateCartUI();
     }
 
-    function updateCartUI() {
-        const keys = Object.keys(cart);
-        document.getElementById('cart-count').innerText = keys.length;
-        let total = 0;
-        document.getElementById('cart-items').innerHTML = keys.map(id => {
-            const item = cart[id];
-            total += item.price * item.qty;
-            return `
-                <div class="cart-item">
-                    <span style="font-size:0.8rem; width:60%;">${item.name}</span>
-                    <div class="qty-ctrl"><input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)"></div>
-                    <b>${item.price * item.qty} ₸</b>
-                </div>`;
-        }).join('');
-        document.getElementById('total-price').innerText = total;
-    }
+    // --- ВСТАВЛЯТЬ СЮДА ---
+
+// 1. Эта функция отвечает за поиск
+function filterProducts() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const categoryTitle = document.getElementById('current-category').innerText;
+    
+    // Ищем товары в текущей группе
+    const group = catalogData.find(g => g.name === categoryTitle);
+    if (!group) return;
+
+    const filtered = (group.items || []).filter(item => 
+        item.name.toLowerCase().includes(query) || 
+        (item.mainShtrih && String(item.mainShtrih).includes(query))
+    );
+
+    // Вызываем отрисовку отфильтрованных товаров
+    renderGrid(filtered);
+}
+
+// Вспомогательная функция для отрисовки карточек
+function renderGrid(items) {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = items.map(item => `
+        <div class="card">
+            <div style="font-size:0.9rem; font-weight:500; height:40px; overflow:hidden;">${item.name}</div>
+            <div style="color:var(--primary); font-weight:bold; margin:10px 0;">${item.price} ₸</div>
+            <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
+        </div>
+    `).join('');
+}
+
+// 2. Анимация полета
+function animateFly(btn, id, name, price) {
+    const cartAnchor = document.getElementById('cart-anchor');
+    const btnRect = btn.getBoundingClientRect();
+    const cartRect = cartAnchor.getBoundingClientRect();
+
+    const flyer = document.createElement('div');
+    flyer.className = 'flying-item';
+    flyer.style.left = btnRect.left + 'px';
+    flyer.style.top = btnRect.top + 'px';
+    document.body.appendChild(flyer);
+
+    setTimeout(() => {
+        flyer.style.left = cartRect.left + 'px';
+        flyer.style.top = cartRect.top + 'px';
+        flyer.style.width = '10px';
+        flyer.style.height = '10px';
+        flyer.style.opacity = '0';
+    }, 10);
+
+    setTimeout(() => {
+        flyer.remove();
+        addToCart(id, name, price); // Товар добавляется в корзину ТОЛЬКО после прилета
+        
+        // Визуальный эффект для кнопки корзины
+        cartAnchor.style.transform = 'scale(1.1)';
+        setTimeout(() => cartAnchor.style.transform = 'scale(1)', 100);
+    }, 800);
+}
+
+// 3. Обновленная корзина с кнопкой удаления (крестиком)
+function updateCartUI() {
+    const keys = Object.keys(cart);
+    document.getElementById('cart-count').innerText = keys.length;
+    let total = 0;
+    
+    const list = document.getElementById('cart-items');
+    list.innerHTML = keys.map(id => {
+        const item = cart[id];
+        total += item.price * item.qty;
+        return `
+            <div class="cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee">
+                <span style="font-size:0.85rem; width:50%">${item.name}</span>
+                <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)" style="width:45px">
+                <b style="width:20%; text-align:right">${item.price * item.qty} ₸</b>
+                <span class="remove-btn" onclick="removeItem('${id}')" style="color:red; cursor:pointer; font-weight:bold; padding-left:10px;">✕</span>
+            </div>`;
+    }).join('');
+    
+    document.getElementById('total-price').innerText = total;
+}
+
+// Новая функция для полного удаления товара
+function removeItem(id) {
+    delete cart[id];
+    updateCartUI();
+}
+
+// --- КОНЕЦ БЛОКА ---
 
     function changeQty(id, val) {
         if (val < 1) delete cart[id];
