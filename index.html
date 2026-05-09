@@ -876,9 +876,14 @@
             fio,
             phone,
             address,
-            items: cart,
-            total: document.getElementById('total-price').innerText,
-            source: "Web Catalog"
+           order_items: Object.keys(cart).map(id => ({
+        object_id: parseInt(id),       // ID продукта в системе Paloma (integer)
+        name: cart[id].name,           // Название продукта (string)
+        count: cart[id].qty,           // Количество (integer)
+        price: parseFloat(cart[id].price) // Цена (number)
+    })),
+    total: document.getElementById('total-price').innerText,
+    source: "Web Catalog"
         };
 
         try {
