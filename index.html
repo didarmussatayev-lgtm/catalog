@@ -55,8 +55,6 @@
 </div>
 <button class="cart-btn" id="cart-anchor" onclick="openCart()">
     🛒 Корзина: <span id="cart-count">0</span>
-</button>
-    <button class="cart-btn" onclick="openCart()">🛒 Корзина: <span id="cart-count">0</span></button>
 </header>
 
 <div class="main-container">
@@ -86,70 +84,79 @@
 
 <script>
     let catalogData = [];
-    let cart = {}; 
+let currentGroupIndex = -1; // Храним индекс выбранной категории
+let cart = {}; 
 
-    // Функция загрузки файла рядом
-    async function loadJsonData() {
-        try {
-            // Файл должен лежать в той же папке на GitHub
-            const response = await fetch('univermag 06-05-2026.json');
-            const data = await response.json();
-            catalogData = data.item_groups;
-            renderSidebar();
-        } catch (e) {
-            document.getElementById('group-list').innerText = "Ошибка загрузки JSON";
-            console.error(e);
-        }
+// Загрузка данных из JSON
+async function loadJsonData() {
+    try {
+        const response = await fetch('univermag 06-05-2026.json');
+        const data = await response.json();
+        catalogData = data.item_groups;
+        renderSidebar();
+    } catch (e) {
+        console.error("Ошибка загрузки JSON:", e);
+        document.getElementById('group-list').innerText = "Ошибка загрузки данных";
     }
+}
 
-    function renderSidebar() {
-        const list = document.getElementById('group-list');
-        list.innerHTML = catalogData.map((g, i) => `
-            <div class="group-item" onclick="renderProducts(${i}, this)">${g.name}</div>
-        `).join('');
-    }
+// Отрисовка категорий слева
+function renderSidebar() {
+    const list = document.getElementById('group-list');
+    list.innerHTML = catalogData.map((g, i) => `
+        <div class="group-item" onclick="selectGroup(${i}, this)">${g.name}</div>
+    `).join('');
+}
 
+// Клик по категории
+function selectGroup(index, el) {
+    currentGroupIndex = index;
+    // Подсветка активной группы
+    document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
     
+    // Обновляем заголовок и сбрасываем поиск
+    const group = catalogData[index];
+    document.getElementById('current-category').innerText = group.name;
+    document.getElementById('search-input').value = ''; 
 
-    function addToCart(id, name, price) {
-        if (cart[id]) cart[id].qty++;
-        else cart[id] = { name, price, qty: 1 };
-        updateCartUI();
-    }
+    // Отрисовываем товары этой группы
+    filterProducts();
+}
 
-    // --- ВСТАВЛЯТЬ СЮДА ---
-
-// 1. Эта функция отвечает за поиск
+// Функция поиска и фильтрации
 function filterProducts() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    const categoryTitle = document.getElementById('current-category').innerText;
+    if (currentGroupIndex === -1) return;
     
-    // Ищем товары в текущей группе
-    const group = catalogData.find(g => g.name === categoryTitle);
-    if (!group) return;
-
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const group = catalogData[currentGroupIndex];
+    
     const filtered = (group.items || []).filter(item => 
         item.name.toLowerCase().includes(query) || 
         (item.mainShtrih && String(item.mainShtrih).includes(query))
     );
 
-    // Вызываем отрисовку отфильтрованных товаров
     renderGrid(filtered);
 }
 
-// Вспомогательная функция для отрисовки карточек
+// Отрисовка сетки товаров
 function renderGrid(items) {
     const grid = document.getElementById('product-grid');
+    if (items.length === 0) {
+        grid.innerHTML = '<p style="padding:20px; color:gray;">Товары не найдены</p>';
+        return;
+    }
+
     grid.innerHTML = items.map(item => `
         <div class="card">
             <div style="font-size:0.9rem; font-weight:500; height:40px; overflow:hidden;">${item.name}</div>
-            <div style="color:var(--primary); font-weight:bold; margin:10px 0;">${item.price} ₸</div>
+            <div style="color:#4f46e5; font-weight:bold; margin:10px 0;">${item.price} ₸</div>
             <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
         </div>
     `).join('');
 }
 
-// 2. Анимация полета
+// Анимация полета
 function animateFly(btn, id, name, price) {
     const cartAnchor = document.getElementById('cart-anchor');
     const btnRect = btn.getBoundingClientRect();
@@ -171,118 +178,53 @@ function animateFly(btn, id, name, price) {
 
     setTimeout(() => {
         flyer.remove();
-        addToCart(id, name, price); // Товар добавляется в корзину ТОЛЬКО после прилета
-        
-        // Визуальный эффект для кнопки корзины
+        addToCart(id, name, price);
         cartAnchor.style.transform = 'scale(1.1)';
         setTimeout(() => cartAnchor.style.transform = 'scale(1)', 100);
     }, 800);
 }
 
-// 3. Обновленная корзина с кнопкой удаления (крестиком)
+function addToCart(id, name, price) {
+    if (cart[id]) cart[id].qty++;
+    else cart[id] = { name, price, qty: 1 };
+    updateCartUI();
+}
+
 function updateCartUI() {
     const keys = Object.keys(cart);
     document.getElementById('cart-count').innerText = keys.length;
     let total = 0;
     
-    const list = document.getElementById('cart-items');
-    list.innerHTML = keys.map(id => {
+    document.getElementById('cart-items').innerHTML = keys.map(id => {
         const item = cart[id];
         total += item.price * item.qty;
         return `
-            <div class="cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee">
+            <div class="cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee">
                 <span style="font-size:0.85rem; width:50%">${item.name}</span>
-                <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)" style="width:45px">
+                <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)" style="width:40px">
                 <b style="width:20%; text-align:right">${item.price * item.qty} ₸</b>
                 <span class="remove-btn" onclick="removeItem('${id}')" style="color:red; cursor:pointer; font-weight:bold; padding-left:10px;">✕</span>
             </div>`;
     }).join('');
-    
     document.getElementById('total-price').innerText = total;
 }
 
-// Новая функция для полного удаления товара
+function changeQty(id, val) {
+    if (val < 1) removeItem(id);
+    else cart[id].qty = parseInt(val);
+    updateCartUI();
+}
+
 function removeItem(id) {
     delete cart[id];
     updateCartUI();
 }
 
-// --- КОНЕЦ БЛОКА ---
+function openCart() { document.getElementById('modal').style.display = 'flex'; }
+function closeCart() { document.getElementById('modal').style.display = 'none'; }
 
-    function changeQty(id, val) {
-        if (val < 1) delete cart[id];
-        else cart[id].qty = parseInt(val);
-        updateCartUI();
-    }
-
-    function openCart() { document.getElementById('modal').style.display = 'flex'; }
-    function closeCart() { document.getElementById('modal').style.display = 'none'; }
-
-    async function sendToWebhook() {
-    const keys = Object.keys(cart);
-    if (keys.length === 0) return alert("Корзина пуста");
-    
-    const fio = document.getElementById('user_fio').value;
-    const phone = document.getElementById('user_phone').value;
-    const address = document.getElementById('user_address').value;
-
-    if (!fio || !phone) return alert("Пожалуйста, заполните ФИО и телефон");
-
-    // Формируем массив согласно вашей документации
-    const order_items = keys.map(id => {
-        const item = cart[id];
-        return {
-            // Используем ID из файла (object_id) и передаем количество/цену
-            object_id: id, 
-            name: item.name,
-            price: item.price,
-            count: item.qty,
-            total_price: item.price * item.qty
-        };
-    });
-
-    // Главный объект запроса
-    const payload = {
-        // Названия полей согласно скриншотам документации
-        customer_name: fio,
-        customer_phone: phone,
-        delivery_address: address,
-        order_items: order_items,
-        // Общая сумма заказа
-        grand_total: parseFloat(document.getElementById('total-price').innerText),
-        order_date: new Date().toISOString()
-    };
-
-    try {
-        const res = await fetch('https://primary-production-7f078.up.railway.app/webhook-test/univermag', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            alert("Заказ успешно отправлен!");
-            // Очистка после успеха
-            cart = {};
-            updateCartUI();
-            closeCart();
-            // Сброс полей формы
-            document.getElementById('user_fio').value = '';
-            document.getElementById('user_phone').value = '';
-            document.getElementById('user_address').value = '';
-        } else {
-            const errorResponse = await res.text();
-            alert("Ошибка сервера: " + errorResponse);
-        }
-    } catch (e) {
-        console.error("Ошибка при отправке:", e);
-        alert("Не удалось отправить данные. Проверьте соединение с интернетом или настройки CORS в n8n.");
-    }
-}
-
-    loadJsonData();
+// Запуск при загрузке
+loadJsonData();
 </script>
 </body>
 </html>
