@@ -508,6 +508,44 @@
                 font-size: 12px;
             }
         }
+        /* Настройки для мобильных устройств */
+@media (max-width: 600px) {
+    body {
+        flex-direction: column; /* Располагаем категории над товарами */
+    }
+
+    #categories {
+        width: 100%; /* Занимаем всю ширину экрана */
+        height: auto; /* Высота подстраивается под содержимое */
+        display: flex;
+        flex-direction: row; /* Выстраиваем категории в ряд */
+        overflow-x: auto; /* Включаем горизонтальную прокрутку */
+        white-space: nowrap; /* Запрещаем перенос текста на новую строку */
+        border-right: none;
+        border-bottom: 1px solid #dcdcdc;
+        padding: 5px 0;
+        /* Скрываем полосу прокрутки для красоты */
+        -ms-overflow-style: none;  /* IE и Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+
+    #categories::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+
+    .cat-item {
+        flex: 0 0 auto; /* Элементы не сжимаются и сохраняют свой размер */
+        width: auto;
+        padding: 10px 15px;
+        font-size: 12px;
+        border-bottom: none;
+        border-right: 1px solid #f0f0f0;
+    }
+
+    #main {
+        width: 100%; /* Основная часть занимает весь экран */
+    }
+}
     </style>
 </head>
 <body>
