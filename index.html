@@ -2,259 +2,229 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Univermag Order System</title>
     <style>
         :root { --primary: #4f46e5; --success: #22c55e; --gray: #64748b; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
-        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
-        .cart-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        
+        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+        
+        .search-container { flex-grow: 1; margin: 0 15px; max-width: 400px; }
+        .search-container input { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+
+        .cart-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+
         .main-container { display: flex; flex-grow: 1; overflow: hidden; }
-        #sidebar { width: 280px; background: white; border-right: 1px solid #e2e8f0; overflow-y: auto; padding: 15px; }
-        .group-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        
+        #sidebar { width: 250px; background: white; border-right: 1px solid #e2e8f0; overflow-y: auto; padding: 10px; }
+        .group-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; font-size: 0.9rem; }
         .group-item:hover { background: #f1f5f9; }
         .group-item.active { background: var(--primary); color: white; }
-        #content { flex-grow: 1; padding: 25px; overflow-y: auto; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; }
-        .add-btn { background: #eff6ff; color: var(--primary); border: 1px solid #dbeafe; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px; }
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
-        .modal-body { background: white; width: 500px; max-height: 85vh; border-radius: 16px; padding: 25px; overflow-y: auto; }
+
+        #content { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        
+        /* Адаптивная сетка */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        
+        @media (max-width: 600px) {
+            #sidebar { width: 120px; padding: 5px; }
+            .group-item { font-size: 0.75rem; padding: 8px; }
+            .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            header { padding: 10px; }
+            .search-container { margin: 0 10px; }
+        }
+
+        .card { background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        .add-btn { background: #eff6ff; color: var(--primary); border: 1px solid #dbeafe; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; width: 100%; }
+
+        /* Анимация полета */
+        .flying-item { position: fixed; pointer-events: none; transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); background: var(--primary); width: 20px; height: 20px; border-radius: 50%; z-index: 9999; }
+
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal-body { background: white; width: 100%; max-width: 500px; max-height: 90vh; border-radius: 16px; padding: 20px; overflow-y: auto; }
+        
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 4px; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .qty-ctrl input { width: 50px; text-align: center; }
-        .submit-order { background: var(--success); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-   /* Поиск в шапке */
-.search-container { flex-grow: 1; margin: 0 20px; max-width: 400px; }
-.search-container input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; }
-
-/* Анимация полета */
-.flying-item {
-    position: fixed;
-    pointer-events: none;
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #4f46e5;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    z-index: 9999;
-    opacity: 0.8;
-}
-
-/* Кнопка удаления в корзине */
-.remove-btn { color: #ef4444; cursor: pointer; padding: 0 10px; font-weight: bold; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        .submit-order { background: var(--success); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1rem; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2 style="margin:0;">Univermag Shop</h2>
+    <h3 style="margin:0; display: none;" id="logo-text">Shop</h3>
     <div class="search-container">
-    <input type="text" id="search-input" placeholder="Поиск по названию или штрих-коду..." oninput="filterProducts()">
-</div>
-<button class="cart-btn" id="cart-anchor" onclick="openCart()">
-    🛒 Корзина: <span id="cart-count">0</span>
+        <input type="text" id="search-input" placeholder="Поиск товара..." oninput="filterProducts()">
+    </div>
+    <button class="cart-btn" id="cart-anchor" onclick="openCart()">
+        🛒 <span id="cart-count">0</span>
+    </button>
 </header>
 
 <div class="main-container">
     <div id="sidebar">
-        <h4 style="margin:10px; color:var(--gray);">КАТЕГОРИИ</h4>
-        <div id="group-list">Загрузка данных...</div>
+        <div id="group-list">Загрузка...</div>
     </div>
     <div id="content">
-        <h2 id="current-category">Выберите категорию</h2>
+        <h3 id="current-category" style="margin-top:0">Выберите категорию</h3>
         <div id="product-grid" class="product-grid"></div>
     </div>
 </div>
 
 <div id="modal">
     <div class="modal-body">
-        <h3 style="margin-top:0">Оформление заказа</h3>
-        <div class="input-group"><label>ФИО</label><input type="text" id="user_fio"></div>
-        <div class="input-group"><label>Телефон</label><input type="tel" id="user_phone"></div>
-        <div class="input-group"><label>Адрес</label><input type="text" id="user_address"></div>
-        <hr>
+        <h3 style="margin-top:0">Корзина</h3>
         <div id="cart-items"></div>
-        <div style="text-align:right; font-size:1.2rem; margin-top:15px;">Итого: <b id="total-price">0</b> ₸</div>
-        <button class="submit-order" onclick="sendToWebhook()">ОТПРАВИТЬ ЗАКАЗ</button>
-        <button onclick="closeCart()" style="width:100%; border:none; background:none; color:var(--gray); cursor:pointer; margin-top:10px;">Назад</button>
+        <div style="text-align:right; font-size:1.2rem; margin: 15px 0;">Итого: <b id="total-price">0</b> ₸</div>
+        <div class="input-group"><label>ФИО</label><input type="text" id="user_fio" placeholder="Иван Иванов"></div>
+        <div class="input-group"><label>Телефон</label><input type="tel" id="user_phone" placeholder="+7 707 ..."></div>
+        <div class="input-group"><label>Адрес доставки</label><input type="text" id="user_address" placeholder="Улица, дом, кв"></div>
+        <button class="submit-order" onclick="sendToWebhook()">ОФОРМИТЬ ЗАКАЗ</button>
+        <button onclick="closeCart()" style="width:100%; border:none; background:none; color:var(--gray); cursor:pointer; margin-top:15px;">Закрыть</button>
     </div>
 </div>
 
 <script>
     let catalogData = [];
-let currentGroupIndex = -1; // Храним индекс выбранной категории
-let cart = {}; 
+    let cart = {};
+    let currentGroupIndex = -1;
+    let currentFilteredItems = [];
 
-// Загрузка данных из JSON
-async function loadJsonData() {
-    try {
-        const response = await fetch('univermag 06-05-2026.json');
-        const data = await response.json();
-        catalogData = data.item_groups;
-        renderSidebar();
-    } catch (e) {
-        console.error("Ошибка загрузки JSON:", e);
-        document.getElementById('group-list').innerText = "Ошибка загрузки данных";
-    }
-}
-
-// Отрисовка категорий слева
-function renderSidebar() {
-    const list = document.getElementById('group-list');
-    list.innerHTML = catalogData.map((g, i) => `
-        <div class="group-item" onclick="selectGroup(${i}, this)">${g.name}</div>
-    `).join('');
-}
-
-// Клик по категории
-function selectGroup(index, el) {
-    currentGroupIndex = index;
-    // Подсветка активной группы
-    document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
-    el.classList.add('active');
-    
-    // Обновляем заголовок и сбрасываем поиск
-    const group = catalogData[index];
-    document.getElementById('current-category').innerText = group.name;
-    document.getElementById('search-input').value = ''; 
-
-    // Отрисовываем товары этой группы
-    filterProducts();
-}
-
-// Функция поиска и фильтрации (теперь по всему каталогу)
-function filterProducts() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    
-    // Если поисковая строка пустая, показываем только товары выбранной группы
-    if (query === "") {
-        if (currentGroupIndex !== -1) {
-            const group = catalogData[currentGroupIndex];
-            document.getElementById('current-category').innerText = group.name;
-            renderGrid(group.items || []);
-        } else {
-            document.getElementById('product-grid').innerHTML = '<p style="padding:20px; color:gray;">Выберите категорию или введите название товара</p>';
+    async function loadJsonData() {
+        try {
+            const response = await fetch('univermag 06-05-2026.json');
+            const data = await response.json();
+            catalogData = data.item_groups;
+            renderSidebar();
+        } catch (e) {
+            document.getElementById('group-list').innerText = "Ошибка загрузки";
         }
-        return;
     }
 
-    // Если есть запрос, ищем по ВСЕМ группам
-    let allMatchedItems = [];
-    
-    catalogData.forEach(group => {
-        const matchedInGroup = (group.items || []).filter(item => 
-            item.name.toLowerCase().includes(query) || 
-            (item.mainShtrih && String(item.mainShtrih).includes(query))
-        );
-        allMatchedItems = allMatchedItems.concat(matchedInGroup);
-    });
-
-    // Меняем заголовок, чтобы пользователь понимал, что это результаты поиска
-    document.getElementById('current-category').innerText = `Результаты поиска: ${allMatchedItems.length}`;
-    
-    // Снимаем выделение с активной группы в сайдбаре, так как мы вышли за её пределы
-    document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
-
-    renderGrid(allMatchedItems);
-}
-
-// Отрисовка сетки товаров (добавим лимит, чтобы браузер не завис от 47к товаров)
-function renderGrid(items) {
-    const grid = document.getElementById('product-grid');
-    if (items.length === 0) {
-        grid.innerHTML = '<p style="padding:20px; color:gray;">Товары не найдены</p>';
-        return;
+    function renderSidebar() {
+        const list = document.getElementById('group-list');
+        list.innerHTML = catalogData.map((g, i) => `
+            <div class="group-item" onclick="selectGroup(${i}, this)">${g.name}</div>
+        `).join('');
     }
 
-    // Если товаров слишком много (например, больше 200), показываем только первые 200
-    // чтобы страница не "тормозила"
-    const itemsToShow = items.slice(0, 200);
-
-    grid.innerHTML = itemsToShow.map(item => `
-        <div class="card">
-            <div style="font-size:0.9rem; font-weight:500; height:40px; overflow:hidden;">${item.name}</div>
-            <div style="font-size:0.75rem; color:gray;">Арт: ${item.article || '—'}</div>
-            <div style="color:#4f46e5; font-weight:bold; margin:10px 0;">${item.price} ₸</div>
-            <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
-        </div>
-    `).join('');
-
-    if (items.length > 200) {
-        grid.innerHTML += `<p style="grid-column: 1/-1; text-align:center; color:gray; padding:20px;">Показаны первые 200 товаров из ${items.length}. Уточните запрос для более точного поиска.</p>`;
+    function selectGroup(index, el) {
+        currentGroupIndex = index;
+        document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('search-input').value = ''; 
+        filterProducts();
     }
-}
 
-// Анимация полета
-function animateFly(btn, id, name, price) {
-    const cartAnchor = document.getElementById('cart-anchor');
-    const btnRect = btn.getBoundingClientRect();
-    const cartRect = cartAnchor.getBoundingClientRect();
+    function filterProducts() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        
+        if (query === "") {
+            if (currentGroupIndex !== -1) {
+                const group = catalogData[currentGroupIndex];
+                document.getElementById('current-category').innerText = group.name;
+                renderGrid(group.items || []);
+            } else {
+                document.getElementById('product-grid').innerHTML = '<p style="padding:20px; color:gray;">Выберите категорию</p>';
+            }
+            return;
+        }
 
-    const flyer = document.createElement('div');
-    flyer.className = 'flying-item';
-    flyer.style.left = btnRect.left + 'px';
-    flyer.style.top = btnRect.top + 'px';
-    document.body.appendChild(flyer);
+        let allMatchedItems = [];
+        catalogData.forEach(group => {
+            const matched = (group.items || []).filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                (item.mainShtrih && String(item.mainShtrih).includes(query))
+            );
+            allMatchedItems = allMatchedItems.concat(matched);
+        });
 
-    setTimeout(() => {
-        flyer.style.left = cartRect.left + 'px';
-        flyer.style.top = cartRect.top + 'px';
-        flyer.style.width = '10px';
-        flyer.style.height = '10px';
-        flyer.style.opacity = '0';
-    }, 10);
+        document.getElementById('current-category').innerText = `Найдено: ${allMatchedItems.length}`;
+        document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
+        renderGrid(allMatchedItems);
+    }
 
-    setTimeout(() => {
-        flyer.remove();
-        addToCart(id, name, price);
-        cartAnchor.style.transform = 'scale(1.1)';
-        setTimeout(() => cartAnchor.style.transform = 'scale(1)', 100);
-    }, 800);
-}
+    function renderGrid(items, append = false) {
+        const grid = document.getElementById('product-grid');
+        if (!append) {
+            grid.innerHTML = '';
+            currentFilteredItems = items;
+        }
 
-function addToCart(id, name, price) {
-    if (cart[id]) cart[id].qty++;
-    else cart[id] = { name, price, qty: 1 };
-    updateCartUI();
-}
+        const currentCount = grid.children.length;
+        const chunk = items.slice(currentCount, currentCount + 20);
 
-function updateCartUI() {
-    const keys = Object.keys(cart);
-    document.getElementById('cart-count').innerText = keys.length;
-    let total = 0;
-    
-    document.getElementById('cart-items').innerHTML = keys.map(id => {
-        const item = cart[id];
-        total += item.price * item.qty;
-        return `
-            <div class="cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee">
-                <span style="font-size:0.85rem; width:50%">${item.name}</span>
-                <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)" style="width:40px">
-                <b style="width:20%; text-align:right">${item.price * item.qty} ₸</b>
-                <span class="remove-btn" onclick="removeItem('${id}')" style="color:red; cursor:pointer; font-weight:bold; padding-left:10px;">✕</span>
-            </div>`;
-    }).join('');
-    document.getElementById('total-price').innerText = total;
-}
+        const html = chunk.map(item => `
+            <div class="card">
+                <div>
+                    <div style="font-size:0.85rem; font-weight:600; height:38px; overflow:hidden; line-height:1.2; margin-bottom:5px;">${item.name}</div>
+                    <div style="color:gray; font-size:0.7rem;">Арт: ${item.article || '—'}</div>
+                </div>
+                <div>
+                    <div style="color:var(--primary); font-weight:bold; margin:8px 0;">${item.price} ₸</div>
+                    <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
+                </div>
+            </div>
+        `).join('');
 
-function changeQty(id, val) {
-    if (val < 1) removeItem(id);
-    else cart[id].qty = parseInt(val);
-    updateCartUI();
-}
+        grid.insertAdjacentHTML('beforeend', html);
+    }
 
-function removeItem(id) {
-    delete cart[id];
-    updateCartUI();
-}
+    // Бесконечный скролл в контейнере контента
+    document.getElementById('content').onscroll = function() {
+        const content = document.getElementById('content');
+        if (content.scrollTop + content.clientHeight >= content.scrollHeight - 50) {
+            if (currentFilteredItems.length > document.getElementById('product-grid').children.length) {
+                renderGrid(currentFilteredItems, true);
+            }
+        }
+    };
 
-function openCart() { document.getElementById('modal').style.display = 'flex'; }
-function closeCart() { document.getElementById('modal').style.display = 'none'; }
+    function animateFly(btn, id, name, price) {
+        const cartAnchor = document.getElementById('cart-anchor');
+        const btnRect = btn.getBoundingClientRect();
+        const cartRect = cartAnchor.getBoundingClientRect();
 
-// Запуск при загрузке
-loadJsonData();
-</script>
-</body>
-</html>
+        const flyer = document.createElement('div');
+        flyer.className = 'flying-item';
+        flyer.style.left = btnRect.left + 'px';
+        flyer.style.top = btnRect.top + 'px';
+        document.body.appendChild(flyer);
+
+        setTimeout(() => {
+            flyer.style.left = cartRect.left + (cartRect.width/2) + 'px';
+            flyer.style.top = cartRect.top + (cartRect.height/2) + 'px';
+            flyer.style.transform = 'scale(0.1)';
+            flyer.style.opacity = '0';
+        }, 10);
+
+        setTimeout(() => {
+            flyer.remove();
+            addToCart(id, name, price);
+            cartAnchor.style.transform = 'scale(1.2)';
+            setTimeout(() => cartAnchor.style.transform = 'scale(1)', 150);
+        }, 700);
+    }
+
+    function addToCart(id, name, price) {
+        if (cart[id]) cart[id].qty++;
+        else cart[id] = { name, price, qty: 1 };
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const keys = Object.keys(cart);
+        document.getElementById('cart-count').innerText = keys.length;
+        let total = 0;
+        
+        document.getElementById('cart-items').innerHTML = keys.map(id => {
+            const item = cart[id];
+            total += item.price * item.qty;
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee; font-size:0.9rem;">
+                    <span style="width:50%">${item.name}</span>
+                    <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)" style="width:45px; padding:5px;
