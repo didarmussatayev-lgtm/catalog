@@ -131,36 +131,68 @@
     function closeCart() { document.getElementById('modal').style.display = 'none'; }
 
     async function sendToWebhook() {
-        const keys = Object.keys(cart);
-        if (keys.length === 0) return alert("Корзина пуста");
-        const fio = document.getElementById('user_fio').value;
-        const phone = document.getElementById('user_phone').value;
-        if (!fio || !phone) return alert("Введите ФИО и телефон");
+    const keys = Object.keys(cart);
+    if (keys.length === 0) return alert("Корзина пуста");
+    
+    const fio = document.getElementById('user_fio').value;
+    const phone = document.getElementById('user_phone').value;
+    const address = document.getElementById('user_address').value;
 
-        const payload = {
-            customer: { fio, phone, address: document.getElementById('user_address').value },
-            order_items: keys.map(id => ({
-                product_id: id,
-                name: cart[id].name,
-                price: cart[id].price,
-                quantity: cart[id].qty,
-                total: cart[id].price * cart[id].qty
-            })),
-            grand_total: document.getElementById('total-price').innerText
+    if (!fio || !phone) return alert("Пожалуйста, заполните ФИО и телефон");
+
+    // Формируем массив согласно вашей документации
+    const order_items = keys.map(id => {
+        const item = cart[id];
+        return {
+            // Используем ID из файла (object_id) и передаем количество/цену
+            id: id, 
+            name: item.name,
+            price: item.price,
+            quantity: item.qty,
+            total_price: item.price * item.qty
         };
+    });
 
-        try {
-            const res = await fetch('https://primary-production-7f078.up.railway.app/webhook-test/univermag', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert("Заказ отправлен!");
-                cart = {}; updateCartUI(); closeCart();
-            }
-        } catch (e) { alert("Ошибка сети. Проверьте CORS в n8n."); }
+    // Главный объект запроса
+    const payload = {
+        // Названия полей согласно скриншотам документации
+        customer_name: fio,
+        customer_phone: phone,
+        delivery_address: address,
+        order_items: order_items,
+        // Общая сумма заказа
+        grand_total: parseFloat(document.getElementById('total-price').innerText),
+        order_date: new Date().toISOString()
+    };
+
+    try {
+        const res = await fetch('https://primary-production-7f078.up.railway.app/webhook-test/univermag', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("Заказ успешно отправлен!");
+            // Очистка после успеха
+            cart = {};
+            updateCartUI();
+            closeCart();
+            // Сброс полей формы
+            document.getElementById('user_fio').value = '';
+            document.getElementById('user_phone').value = '';
+            document.getElementById('user_address').value = '';
+        } else {
+            const errorResponse = await res.text();
+            alert("Ошибка сервера: " + errorResponse);
+        }
+    } catch (e) {
+        console.error("Ошибка при отправке:", e);
+        alert("Не удалось отправить данные. Проверьте соединение с интернетом или настройки CORS в n8n.");
     }
+}
 
     loadJsonData();
 </script>
