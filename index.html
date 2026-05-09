@@ -145,10 +145,10 @@
         const item = cart[id];
         return {
             // Используем ID из файла (object_id) и передаем количество/цену
-            id: id, 
+            object_id: id, 
             name: item.name,
             price: item.price,
-            quantity: item.qty,
+            count: item.qty,
             total_price: item.price * item.qty
         };
     });
