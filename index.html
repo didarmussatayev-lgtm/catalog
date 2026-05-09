@@ -124,22 +124,43 @@ function selectGroup(index, el) {
     filterProducts();
 }
 
-// Функция поиска и фильтрации
+// Функция поиска и фильтрации (теперь по всему каталогу)
 function filterProducts() {
-    if (currentGroupIndex === -1) return;
-    
     const query = document.getElementById('search-input').value.toLowerCase();
-    const group = catalogData[currentGroupIndex];
     
-    const filtered = (group.items || []).filter(item => 
-        item.name.toLowerCase().includes(query) || 
-        (item.mainShtrih && String(item.mainShtrih).includes(query))
-    );
+    // Если поисковая строка пустая, показываем только товары выбранной группы
+    if (query === "") {
+        if (currentGroupIndex !== -1) {
+            const group = catalogData[currentGroupIndex];
+            document.getElementById('current-category').innerText = group.name;
+            renderGrid(group.items || []);
+        } else {
+            document.getElementById('product-grid').innerHTML = '<p style="padding:20px; color:gray;">Выберите категорию или введите название товара</p>';
+        }
+        return;
+    }
 
-    renderGrid(filtered);
+    // Если есть запрос, ищем по ВСЕМ группам
+    let allMatchedItems = [];
+    
+    catalogData.forEach(group => {
+        const matchedInGroup = (group.items || []).filter(item => 
+            item.name.toLowerCase().includes(query) || 
+            (item.mainShtrih && String(item.mainShtrih).includes(query))
+        );
+        allMatchedItems = allMatchedItems.concat(matchedInGroup);
+    });
+
+    // Меняем заголовок, чтобы пользователь понимал, что это результаты поиска
+    document.getElementById('current-category').innerText = `Результаты поиска: ${allMatchedItems.length}`;
+    
+    // Снимаем выделение с активной группы в сайдбаре, так как мы вышли за её пределы
+    document.querySelectorAll('.group-item').forEach(item => item.classList.remove('active'));
+
+    renderGrid(allMatchedItems);
 }
 
-// Отрисовка сетки товаров
+// Отрисовка сетки товаров (добавим лимит, чтобы браузер не завис от 47к товаров)
 function renderGrid(items) {
     const grid = document.getElementById('product-grid');
     if (items.length === 0) {
@@ -147,13 +168,22 @@ function renderGrid(items) {
         return;
     }
 
-    grid.innerHTML = items.map(item => `
+    // Если товаров слишком много (например, больше 200), показываем только первые 200
+    // чтобы страница не "тормозила"
+    const itemsToShow = items.slice(0, 200);
+
+    grid.innerHTML = itemsToShow.map(item => `
         <div class="card">
             <div style="font-size:0.9rem; font-weight:500; height:40px; overflow:hidden;">${item.name}</div>
+            <div style="font-size:0.75rem; color:gray;">Арт: ${item.article || '—'}</div>
             <div style="color:#4f46e5; font-weight:bold; margin:10px 0;">${item.price} ₸</div>
             <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
         </div>
     `).join('');
+
+    if (items.length > 200) {
+        grid.innerHTML += `<p style="grid-column: 1/-1; text-align:center; color:gray; padding:20px;">Показаны первые 200 товаров из ${items.length}. Уточните запрос для более точного поиска.</p>`;
+    }
 }
 
 // Анимация полета
