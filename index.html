@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Univermag Shop</title>
     <style>
-        :root { --primary: #4f46e5; --success: #22c55e; --gray: #64748b; }
+        :root { --primary: #4f46e5; --success: #22c55e; --gray: #64748b; --error: #ef4444; }
         body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
         
         header { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
@@ -55,6 +55,12 @@
         .modal-content { flex: 1; overflow-y: auto; }
         .modal-buttons { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
         .flying-item { position: fixed; pointer-events: none; transition: all 0.7s ease-in; background: var(--primary); width: 15px; height: 15px; border-radius: 50%; z-index: 999; }
+        
+        /* Стили для ошибок */
+        .form-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .form-input.error { border-color: var(--error); background-color: #fef2f2; }
+        .error-msg { color: var(--error); font-size: 0.85rem; margin-top: -8px; margin-bottom: 8px; display: none; }
+        .error-msg.show { display: block; }
     </style>
 </head>
 <body>
@@ -82,9 +88,15 @@
             <h3 style="margin-top:0; margin-bottom:15px;">Корзина</h3>
             <div id="cart-items"></div>
             <div style="text-align:right; margin: 15px 0; font-size: 1.1rem;">Итого: <b id="total-price">0</b> ₸</div>
-            <input type="text" id="user_fio" placeholder="Ваше Имя" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            <input type="tel" id="user_phone" placeholder="Телефон" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            <input type="text" id="user_address" placeholder="Адрес доставки (город, улица, дом)" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            
+            <input type="text" id="user_fio" class="form-input" placeholder="Ваше Имя" maxlength="100">
+            <div class="error-msg" id="error-fio">Пожалуйста, введите ваше имя</div>
+            
+            <input type="tel" id="user_phone" class="form-input" placeholder="Телефон (8/7 XXXXXXXXXX или +7XXXXXXXXXX)" maxlength="20" oninput="formatPhone(this)">
+            <div class="error-msg" id="error-phone">Телефон должен содержать 11 цифр и начинаться с 7 или 8</div>
+            
+            <input type="text" id="user_address" class="form-input" placeholder="Адрес доставки (город, улица, дом)" maxlength="200">
+            <div class="error-msg" id="error-address">Пожалуйста, введите адрес доставки</div>
         </div>
         <div class="modal-buttons">
             <button onclick="sendOrder()" style="width:100%; background:var(--success); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ОТПРАВИТЬ ЗАКАЗ</button>
@@ -245,13 +257,89 @@
         updateUI();
     }
 
+    // Форматирование телефона
+    function formatPhone(input) {
+        let value = input.value.replace(/\D/g, '');
+        
+        // Если начинается с 8 или 7, заменяем 8 на 7
+        if (value.length > 0) {
+            if (value[0] === '8') {
+                value = '7' + value.slice(1);
+            }
+        }
+        
+        // Добавляем +
+        if (value.length > 0 && !value.startsWith('+')) {
+            value = '+' + value;
+        }
+        
+        input.value = value;
+    }
+
+    // Проверка валидности полей
+    function validateFields() {
+        let isValid = true;
+        
+        // Проверка имени
+        const fio = document.getElementById('user_fio');
+        const fioError = document.getElementById('error-fio');
+        const fioValue = fio.value.trim();
+        
+        if (!fioValue) {
+            fio.classList.add('error');
+            fioError.classList.add('show');
+            isValid = false;
+        } else {
+            fio.classList.remove('error');
+            fioError.classList.remove('show');
+        }
+        
+        // Проверка телефона
+        const phone = document.getElementById('user_phone');
+        const phoneError = document.getElementById('error-phone');
+        const phoneValue = phone.value.replace(/\D/g, '');
+        
+        if (!phoneValue || phoneValue.length !== 11 || !phoneValue.startsWith('7')) {
+            phone.classList.add('error');
+            phoneError.classList.add('show');
+            isValid = false;
+        } else {
+            phone.classList.remove('error');
+            phoneError.classList.remove('show');
+        }
+        
+        // Проверка адреса
+        const address = document.getElementById('user_address');
+        const addressError = document.getElementById('error-address');
+        const addressValue = address.value.trim();
+        
+        if (!addressValue) {
+            address.classList.add('error');
+            addressError.classList.add('show');
+            isValid = false;
+        } else {
+            address.classList.remove('error');
+            addressError.classList.remove('show');
+        }
+        
+        return isValid;
+    }
+
     async function sendOrder() {
+        // Проверяем корзину
+        if (Object.keys(cart).length === 0) {
+            alert("Корзина пуста");
+            return;
+        }
+        
+        // Валидируем поля
+        if (!validateFields()) {
+            return;
+        }
+
         const fio = document.getElementById('user_fio').value;
         const phone = document.getElementById('user_phone').value;
         const address = document.getElementById('user_address').value;
-
-        if (!fio || !phone || !address) return alert("Пожалуйста, заполните все поля (Имя, Телефон и Адрес)");
-        if (Object.keys(cart).length === 0) return alert("Корзина пуста");
 
         const btn = event.target;
         btn.disabled = true;
@@ -277,6 +365,10 @@
                 alert("Заказ успешно принят!");
                 cart = {};
                 updateUI();
+                // Очищаем форму
+                document.getElementById('user_fio').value = '';
+                document.getElementById('user_phone').value = '';
+                document.getElementById('user_address').value = '';
                 closeCart();
             } else {
                 throw new Error();
