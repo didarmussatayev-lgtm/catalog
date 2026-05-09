@@ -442,19 +442,21 @@
             
             /* КЛЮЧЕВОЕ: Sidebar горизонтальный с прокруткой */
             .sidebar { 
-                width: 100%; 
-                height: auto; 
-                border-right: none; 
-                border-bottom: 1px solid #ddd; 
-                padding: 10px;
-                display: flex;
-                overflow-x: auto;
-                overflow-y: visible;
-                -webkit-overflow-scrolling: touch;
-                gap: 6px;
-                background: white;
+               width: 100%; 
+        height: auto; 
+        border-right: none; 
+        border-bottom: 1px solid #ddd; 
+        padding: 10px;
+        display: block; /* Меняем на block, так как скроллить будем внутренний список */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        background: white;
             }
-            
+            /* ДОБАВЬТЕ ЭТОТ БЛОК */
+    #group-list {
+        display: flex; /* Выстраивает категории в ряд */
+        gap: 8px;      /* Расстояние между категориями */
+    }
             .sidebar-item { 
                 flex-shrink: 0;
                 padding: 8px 12px;
