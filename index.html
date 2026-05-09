@@ -44,7 +44,9 @@
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Поиск..." oninput="filterProducts()">
     </div>
-    <button class="cart-btn" id="cart-anchor" onclick="openCart()">🛒 <span id="cart-count">0</span></button>
+    <button class="cart-btn" id="cart-anchor" onclick="openCart()">
+    🛒 <span id="cart-count">0</span>
+</button>
 </header>
 
 <div class="main-container">
@@ -63,6 +65,10 @@
         <input type="text" id="user_fio" placeholder="Ваше Имя" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
         <input type="tel" id="user_phone" placeholder="Телефон" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
         <input type="text" id="user_address" placeholder="Адрес доставки (город, улица, дом)" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px; box-sizing: border-box;">
+       <div id="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 15px;">
+    <div class="modal-body" style="background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 20px;">
+        </div>
+</div>
         <button onclick="sendOrder()" style="width:100%; background:var(--success); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ОТПРАВИТЬ ЗАКАЗ</button>
         <button onclick="closeCart()" style="width:100%; background:none; border:none; color:var(--gray); margin-top:10px; cursor:pointer;">Закрыть</button>
     </div>
