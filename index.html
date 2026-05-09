@@ -5,55 +5,39 @@
     <title>Univermag Order System</title>
     <style>
         :root { --primary: #4f46e5; --success: #22c55e; --gray: #64748b; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
-        
-        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .cart-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .cart-btn:hover { opacity: 0.9; }
-
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
+        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .cart-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         .main-container { display: flex; flex-grow: 1; overflow: hidden; }
-        
-        /* Стили списка групп */
         #sidebar { width: 280px; background: white; border-right: 1px solid #e2e8f0; overflow-y: auto; padding: 15px; }
-        .group-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; color: #334155; }
+        .group-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .group-item:hover { background: #f1f5f9; }
-        .group-item.active { background: var(--primary); color: white; font-weight: 500; }
-
-        /* Стили сетки товаров */
+        .group-item.active { background: var(--primary); color: white; }
         #content { flex-grow: 1; padding: 25px; overflow-y: auto; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
-        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .price { color: var(--primary); font-weight: bold; font-size: 1.1rem; margin: 10px 0; }
-        .add-btn { background: #eff6ff; color: var(--primary); border: 1px solid #dbeafe; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
-        .add-btn:hover { background: var(--primary); color: white; }
-
-        /* Модалка корзины */
+        .card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+        .add-btn { background: #eff6ff; color: var(--primary); border: 1px solid #dbeafe; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px; }
         #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
-        .modal-body { background: white; width: 500px; max-height: 85vh; border-radius: 16px; padding: 25px; overflow-y: auto; position: relative; }
-        
+        .modal-body { background: white; width: 500px; max-height: 85vh; border-radius: 16px; padding: 25px; overflow-y: auto; }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 4px; }
         .input-group input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
-        
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .qty-ctrl { display: flex; align-items: center; gap: 8px; }
-        .qty-ctrl input { width: 45px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 4px; }
-        
-        .submit-order { background: var(--success); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 20px; }
+        .qty-ctrl input { width: 50px; text-align: center; }
+        .submit-order { background: var(--success); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2 style="margin:0; color:#1e293b;">Univermag Shop</h2>
+    <h2 style="margin:0;">Univermag Shop</h2>
     <button class="cart-btn" onclick="openCart()">🛒 Корзина: <span id="cart-count">0</span></button>
 </header>
 
 <div class="main-container">
     <div id="sidebar">
-        <h4 style="margin:0 0 15px 10px; color:var(--gray);">КАТЕГОРИИ</h4>
-        <div id="group-list"></div>
+        <h4 style="margin:10px; color:var(--gray);">КАТЕГОРИИ</h4>
+        <div id="group-list">Загрузка данных...</div>
     </div>
     <div id="content">
         <h2 id="current-category">Выберите категорию</h2>
@@ -61,33 +45,39 @@
     </div>
 </div>
 
-<div id="modal" onclick="if(event.target==this) closeCart()">
+<div id="modal">
     <div class="modal-body">
         <h3 style="margin-top:0">Оформление заказа</h3>
-        
-        <div class="input-group"><label>ФИО</label><input type="text" id="user_fio" placeholder="Введите имя"></div>
-        <div class="input-group"><label>Телефон</label><input type="tel" id="user_phone" placeholder="+7 700 000 00 00"></div>
-        <div class="input-group"><label>Адрес</label><input type="text" id="user_address" placeholder="Город, улица..."></div>
-        
-        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-        
+        <div class="input-group"><label>ФИО</label><input type="text" id="user_fio"></div>
+        <div class="input-group"><label>Телефон</label><input type="tel" id="user_phone"></div>
+        <div class="input-group"><label>Адрес</label><input type="text" id="user_address"></div>
+        <hr>
         <div id="cart-items"></div>
         <div style="text-align:right; font-size:1.2rem; margin-top:15px;">Итого: <b id="total-price">0</b> ₸</div>
-        
         <button class="submit-order" onclick="sendToWebhook()">ОТПРАВИТЬ ЗАКАЗ</button>
-        <button onclick="closeCart()" style="width:100%; border:none; background:none; color:var(--gray); cursor:pointer; margin-top:10px;">Продолжить выбор</button>
+        <button onclick="closeCart()" style="width:100%; border:none; background:none; color:var(--gray); cursor:pointer; margin-top:10px;">Назад</button>
     </div>
 </div>
 
 <script>
-    // === ВСТАВЬТЕ СВОЙ МАССИВ ТУТ ===
-    const catalogData = [
-        /* Здесь ваши группы товаров из JSON */
-    ];
-
+    let catalogData = [];
     let cart = {}; 
 
-    function init() {
+    // Функция загрузки файла рядом
+    async function loadJsonData() {
+        try {
+            // Файл должен лежать в той же папке на GitHub
+            const response = await fetch('univermag 06-05-2026.json');
+            const data = await response.json();
+            catalogData = data.item_groups;
+            renderSidebar();
+        } catch (e) {
+            document.getElementById('group-list').innerText = "Ошибка загрузки JSON";
+            console.error(e);
+        }
+    }
+
+    function renderSidebar() {
         const list = document.getElementById('group-list');
         list.innerHTML = catalogData.map((g, i) => `
             <div class="group-item" onclick="renderProducts(${i}, this)">${g.name}</div>
@@ -97,15 +87,12 @@
     function renderProducts(index, el) {
         document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-
         const group = catalogData[index];
         document.getElementById('current-category').innerText = group.name;
-        const grid = document.getElementById('product-grid');
-        
-        grid.innerHTML = (group.items || []).map(item => `
+        document.getElementById('product-grid').innerHTML = (group.items || []).map(item => `
             <div class="card">
-                <div style="font-size:0.95rem; font-weight:500; height:40px; overflow:hidden;">${item.name}</div>
-                <div class="price">${item.price} ₸</div>
+                <div style="font-size:0.9rem; font-weight:500;">${item.name}</div>
+                <div style="color:var(--primary); font-weight:bold; margin:10px 0;">${item.price} ₸</div>
                 <button class="add-btn" onclick="addToCart('${item.object_id}', '${item.name}', ${item.price})">Выбрать</button>
             </div>
         `).join('');
@@ -114,27 +101,22 @@
     function addToCart(id, name, price) {
         if (cart[id]) cart[id].qty++;
         else cart[id] = { name, price, qty: 1 };
-        updateCartInfo();
+        updateCartUI();
     }
 
-    function updateCartInfo() {
+    function updateCartUI() {
         const keys = Object.keys(cart);
         document.getElementById('cart-count').innerText = keys.length;
-        
         let total = 0;
-        const list = document.getElementById('cart-items');
-        list.innerHTML = keys.map(id => {
+        document.getElementById('cart-items').innerHTML = keys.map(id => {
             const item = cart[id];
             total += item.price * item.qty;
             return `
                 <div class="cart-item">
-                    <span style="font-size:0.85rem; width:200px;">${item.name}</span>
-                    <div class="qty-ctrl">
-                        <input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)">
-                    </div>
+                    <span style="font-size:0.8rem; width:60%;">${item.name}</span>
+                    <div class="qty-ctrl"><input type="number" value="${item.qty}" min="1" onchange="changeQty('${id}', this.value)"></div>
                     <b>${item.price * item.qty} ₸</b>
-                </div>
-            `;
+                </div>`;
         }).join('');
         document.getElementById('total-price').innerText = total;
     }
@@ -142,7 +124,7 @@
     function changeQty(id, val) {
         if (val < 1) delete cart[id];
         else cart[id].qty = parseInt(val);
-        updateCartInfo();
+        updateCartUI();
     }
 
     function openCart() { document.getElementById('modal').style.display = 'flex'; }
@@ -151,23 +133,19 @@
     async function sendToWebhook() {
         const keys = Object.keys(cart);
         if (keys.length === 0) return alert("Корзина пуста");
-        
         const fio = document.getElementById('user_fio').value;
         const phone = document.getElementById('user_phone').value;
-        if (!fio || !phone) return alert("Заполните контакты!");
-
-        const order_items = keys.map(id => ({
-            id: id,
-            name: cart[id].name,
-            price: cart[id].price,
-            quantity: cart[id].qty,
-            sum: cart[id].price * cart[id].qty
-        }));
+        if (!fio || !phone) return alert("Введите ФИО и телефон");
 
         const payload = {
-            fio, phone, 
-            address: document.getElementById('user_address').value,
-            order_items,
+            customer: { fio, phone, address: document.getElementById('user_address').value },
+            order_items: keys.map(id => ({
+                product_id: id,
+                name: cart[id].name,
+                price: cart[id].price,
+                quantity: cart[id].qty,
+                total: cart[id].price * cart[id].qty
+            })),
             grand_total: document.getElementById('total-price').innerText
         };
 
@@ -178,13 +156,13 @@
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                alert("Успешно отправлено!");
-                cart = {}; updateCartInfo(); closeCart();
+                alert("Заказ отправлен!");
+                cart = {}; updateCartUI(); closeCart();
             }
-        } catch (e) { alert("Ошибка сети"); }
+        } catch (e) { alert("Ошибка сети. Проверьте CORS в n8n."); }
     }
 
-    init();
+    loadJsonData();
 </script>
 </body>
 </html>
