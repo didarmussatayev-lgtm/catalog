@@ -3,159 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Витрина товаров</title>
+    <title>Univermag - Заказ</title>
     <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #22c55e;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             display: flex;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
+            background-color: #f8fafc;
         }
 
-        /* Боковая панель с группами */
+        /* Шапка с корзиной */
+        header {
+            background: #fff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-status {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        /* Боковая панель */
         #sidebar {
-            width: 300px;
-            background-color: #fff;
-            border-right: 1px solid #ddd;
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
             overflow-y: auto;
             padding: 20px;
         }
 
-        #sidebar h2 {
-            font-size: 1.2rem;
-            color: #333;
-        }
-
         .group-item {
-            padding: 10px;
-            margin-bottom: 5px;
+            padding: 12px;
+            margin-bottom: 4px;
             cursor: pointer;
-            border-radius: 5px;
-            transition: background 0.3s;
+            border-radius: 6px;
+            transition: 0.2s;
         }
 
-        .group-item:hover {
-            background-color: #e0e7ff;
-        }
+        .group-item:hover { background: #f1f5f9; }
+        .group-item.active { background: var(--primary); color: white; }
 
-        .group-item.active {
-            background-color: #4f46e5;
-            color: white;
-        }
-
-        /* Основной контент с товарами */
+        /* Контент */
         #content {
             flex-grow: 1;
-            padding: 20px;
+            padding: 30px;
             overflow-y: auto;
         }
 
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 20px;
         }
 
         .product-card {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .product-card h3 {
-            font-size: 1rem;
-            margin: 0 0 10px 0;
-            color: #444;
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
-        .price {
+        /* Модальное окно корзины */
+        #cart-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
             font-weight: bold;
-            color: #2563eb;
-        }
-
-        .article {
-            font-size: 0.8rem;
-            color: #888;
+            cursor: pointer;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div id="sidebar">
-        <h2>Категории</h2>
-        <div id="group-list">Загрузка групп...</div>
+    <header>
+        <h1 style="margin:0; font-size: 1.5rem;">Univermag</h1>
+        <div class="cart-status" onclick="toggleCart()">
+            🛒 Корзина: <span id="cart-count">0</span>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <div id="sidebar">
+            <h3>Категории</h3>
+            <div id="group-list">Загрузка...</div>
+        </div>
+
+        <div id="content">
+            <h2 id="group-title">Выберите категорию</h2>
+            <div id="items-container" class="items-grid"></div>
+        </div>
     </div>
 
-    <div id="content">
-        <h2 id="selected-group-name">Выберите категорию</h2>
-        <div id="items-container" class="items-grid"></div>
+    <div id="cart-modal">
+        <div class="modal-content">
+            <h3>Ваш заказ</h3>
+            <div id="cart-items-list"></div>
+            <hr>
+            <div id="cart-total"></div>
+            <button class="btn-confirm" onclick="sendOrder()">✅ Подтвердить и отправить</button>
+            <button onclick="toggleCart()" style="border:none; background:none; width:100%; margin-top:10px; cursor:pointer; color:#666;">Закрыть</button>
+        </div>
     </div>
 
     <script>
         let catalogData = [];
+        let cart = [];
 
-        // Функция для загрузки JSON
         async function loadData() {
             try {
-                // Укажите здесь имя вашего файла
                 const response = await fetch('univermag 06-05-2026.json');
                 const data = await response.json();
-                
-                // Предполагаем структуру: data.item_groups
                 catalogData = data.item_groups;
                 renderGroups();
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-                document.getElementById('group-list').innerText = "Ошибка загрузки файла JSON.";
-            }
+            } catch (e) { console.error("Ошибка:", e); }
         }
 
-        // Отображение списка групп слева
         function renderGroups() {
-            const groupList = document.getElementById('group-list');
-            groupList.innerHTML = '';
-
-            catalogData.forEach((group, index) => {
-                const div = document.createElement('div');
-                div.className = 'group-item';
-                div.innerText = group.name;
-                div.onclick = () => showItems(index, div);
-                groupList.appendChild(div);
-            });
+            const list = document.getElementById('group-list');
+            list.innerHTML = catalogData.map((g, i) => `
+                <div class="group-item" onclick="showItems(${i}, this)">${g.name}</div>
+            `).join('');
         }
 
-        // Отображение товаров выбранной группы
-        function showItems(groupIndex, element) {
-            // Подсветка активной группы
-            document.querySelectorAll('.group-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-
-            const group = catalogData[groupIndex];
-            document.getElementById('selected-group-name').innerText = group.name;
+        function showItems(index, el) {
+            document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
             
+            const group = catalogData[index];
+            document.getElementById('group-title').innerText = group.name;
             const container = document.getElementById('items-container');
-            container.innerHTML = '';
+            
+            container.innerHTML = group.items.map(item => `
+                <div class="product-card">
+                    <div>
+                        <h4 style="margin:0">${item.name}</h4>
+                        <p style="color:var(--primary); font-weight:bold">${item.price} ₸</p>
+                    </div>
+                    <button class="btn-add" onclick="addToCart('${item.object_id}', '${item.name}', ${item.price})">Выбрать</button>
+                </div>
+            `).join('');
+        }
 
-            if (group.items && group.items.length > 0) {
-                group.items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <h3>${item.name}</h3>
-                        <p class="price">${item.price} ₸</p>
-                        <p class="article">Артикул: ${item.article || '—'}</p>
-                        <p class="article">Штрих-код: ${item.mainShtrih}</p>
-                    `;
-                    container.appendChild(card);
+        function addToCart(id, name, price) {
+            cart.push({ id, name, price });
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const list = document.getElementById('cart-items-list');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            
+            list.innerHTML = cart.map((item, i) => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem">
+                    <span>${item.name}</span>
+                    <b>${item.price} ₸</b>
+                </div>
+            `).join('');
+            
+            document.getElementById('cart-total').innerHTML = `<b>Итого: ${total} ₸</b>`;
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function sendOrder() {
+            if (cart.length === 0) return alert("Корзина пуста");
+
+            const webhookUrl = 'https://primary-production-7f078.up.railway.app/webhook-test/univermag';
+            
+            const payload = {
+                order_date: new Date().toISOString(),
+                items: cart,
+                total_amount: cart.reduce((sum, item) => sum + item.price, 0),
+                source: "Web-App-Univermag"
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-            } else {
-                container.innerHTML = '<p>В этой категории нет товаров.</p>';
+
+                if (response.ok) {
+                    alert("✅ Заказ успешно отправлен!");
+                    cart = [];
+                    updateCartUI();
+                    toggleCart();
+                } else {
+                    alert("Ошибка при отправке");
+                }
+            } catch (e) {
+                alert("Не удалось отправить данные на вебхук");
+                console.error(e);
             }
         }
 
-        // Запуск при загрузке страницы
         loadData();
     </script>
 </body>
