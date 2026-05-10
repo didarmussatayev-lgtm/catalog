@@ -121,7 +121,7 @@
         .container {
             display: flex;
             gap: 0;
-            min-height: calc(100vh - 200px);
+            height: calc(100vh - 155px);
         }
         
         /* Sidebar */
@@ -174,18 +174,22 @@
             flex-direction: column;
         }
         
+        .content-header {
+            flex-shrink: 0;
+            margin-bottom: 25px;
+        }
+        
         .category-title {
             font-size: 28px;
             font-weight: 700;
-            margin-bottom: 25px;
             color: #333;
+            margin: 0;
         }
         
         .product-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
             gap: 20px;
-            flex: 1;
         }
         
         .product-card {
@@ -197,6 +201,7 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
+            height: fit-content;
         }
         
         .product-card:hover {
@@ -246,11 +251,12 @@
             color: #333;
             margin-bottom: 10px;
             line-height: 1.4;
-            min-height: 32px;
+            min-height: auto;
         }
         
         .product-price {
             margin-top: auto;
+            padding-top: 10px;
         }
         
         .price-old {
@@ -374,7 +380,7 @@
         @media (max-width: 768px) {
             .container { 
                 flex-direction: column; 
-                min-height: auto;
+                height: auto;
             }
             .sidebar { 
                 width: 100%; 
@@ -397,6 +403,9 @@
             .content { 
                 height: auto; 
                 padding: 15px; 
+            }
+            .content-header {
+                margin-bottom: 15px;
             }
             .product-grid { 
                 grid-template-columns: repeat(3, 1fr); 
@@ -438,7 +447,6 @@
             }
             .category-title { 
                 font-size: 20px; 
-                margin-bottom: 15px; 
             }
             .scroll-top-btn {
                 bottom: 20px;
@@ -451,6 +459,9 @@
         
         /* Responsive - Мобильные */
         @media (max-width: 600px) {
+            .container {
+                height: auto;
+            }
             header { 
                 padding: 12px 15px; 
                 flex-wrap: wrap;
@@ -522,6 +533,9 @@
                 height: auto; 
                 padding: 12px; 
             }
+            .content-header {
+                margin-bottom: 12px;
+            }
             .product-grid { 
                 grid-template-columns: repeat(2, 1fr); 
                 gap: 10px; 
@@ -538,11 +552,10 @@
             }
             .product-name { 
                 font-size: 12px; 
-                min-height: 24px;
+                margin-bottom: 8px;
             }
             .category-title { 
                 font-size: 18px; 
-                margin-bottom: 12px; 
             }
             .price-current {
                 font-size: 14px;
@@ -590,7 +603,9 @@
     </div>
     
     <div class="content">
-        <h1 class="category-title" id="current-category">Выберите категорию</h1>
+        <div class="content-header">
+            <h1 class="category-title" id="current-category">Выберите категорию</h1>
+        </div>
         <div id="product-grid" class="product-grid"></div>
     </div>
 </div>
