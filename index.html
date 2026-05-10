@@ -9,7 +9,7 @@
         
         :root { 
             --primary: #D65A1F; 
-            --primary-light: #F56A42;
+            --primary-light: #FF7A4D;
             --success: #22c55e; 
             --gray: #64748b;
             --light-gray: #F1F1F1;
@@ -90,7 +90,7 @@
             transition: 0.2s;
         }
         
-        .cart-btn:hover { background: #e85d35; }
+        .cart-btn:hover { background: #ff6b3a; }
         
         /* Navigation */
         nav {
@@ -201,7 +201,7 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            height: fit-content;
+            height: 380px;
         }
         
         .product-card:hover {
@@ -219,6 +219,7 @@
             font-size: 50px;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
         
         .discount-badge {
@@ -252,11 +253,13 @@
             margin-bottom: 10px;
             line-height: 1.4;
             min-height: auto;
+            flex: 1;
         }
         
         .product-price {
             margin-top: auto;
             padding-top: 10px;
+            flex-shrink: 0;
         }
         
         .price-old {
@@ -287,6 +290,7 @@
             font-weight: 600;
             font-size: 13px;
             transition: 0.2s;
+            flex-shrink: 0;
         }
         
         .add-btn:hover { background: #e55a00; }
@@ -410,6 +414,9 @@
             .product-grid { 
                 grid-template-columns: repeat(3, 1fr); 
                 gap: 12px; 
+            }
+            .product-card {
+                height: auto;
             }
             header { 
                 flex-wrap: wrap; 
@@ -541,7 +548,8 @@
                 gap: 10px; 
             }
             .product-card { 
-                border-radius: 8px; 
+                border-radius: 8px;
+                height: auto;
             }
             .product-image { 
                 height: 100px; 
@@ -753,8 +761,8 @@
         const chunk = items.slice(currentCount, currentCount + 20);
 
         const html = chunk.map((item, index) => {
-            // Половина товаров со скидкой (каждый второй товар)
-            const hasDiscount = index % 2 === 0;
+            // 50% товаров со скидкой рандомно
+            const hasDiscount = Math.random() < 0.5;
             const discount = hasDiscount ? 10 + Math.floor(Math.random() * 11) : 0; // От 10 до 20%
             const markupPrice = Math.ceil(item.price * (1 + discount / 100));
             
