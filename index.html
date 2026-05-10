@@ -8,16 +8,19 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root { 
-            --primary: #c2410c; 
+            --primary: #D65A1F; 
             --success: #22c55e; 
             --gray: #64748b;
-            --light-gray: #f5f5f5;
+            --light-gray: #F1F1F1;
             --dark-gray: #333;
+            --bg-light: #FAF8F5;
+            --price-yellow: #FFC83D;
+            --buy-btn: #FF6A00;
         }
         
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #ffffff;
+            background: var(--bg-light);
             color: #333;
         }
         
@@ -84,7 +87,7 @@
             font-size: 15px;
         }
         
-        .cart-btn:hover { background: #a03309; }
+        .cart-btn:hover { background: #b8480f; }
         
         /* Navigation */
         nav {
@@ -121,7 +124,7 @@
         /* Sidebar */
         .sidebar {
             width: 200px;
-            background: var(--light-gray);
+            background: white;
             padding: 20px 15px;
             height: 100%;
             overflow-y: auto;
@@ -133,26 +136,28 @@
             padding: 12px 15px;
             margin-bottom: 8px;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             transition: 0.2s;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #555;
+            color: #666;
+            background: var(--light-gray);
         }
         
         .sidebar-item:hover { 
-            background: #eee;
+            background: #e8e8e8;
             color: #333;
         }
         
         .sidebar-item.active { 
-            background: white;
-            color: var(--primary); 
+            background: var(--primary);
+            color: white;
             font-weight: 600;
-            border-left: 3px solid var(--primary);
-            padding-left: 12px;
+            border-left: none;
+            padding: 12px 15px;
+            box-shadow: 0 4px 12px rgba(214, 90, 31, 0.3);
         }
         
         .sidebar-icon { font-size: 18px; }
@@ -163,6 +168,7 @@
             padding: 30px;
             overflow-y: auto;
             height: 100%;
+            background: var(--bg-light);
         }
         
         .category-title {
@@ -216,6 +222,11 @@
             border-radius: 6px;
             font-weight: 700;
             font-size: 14px;
+            display: none;
+        }
+        
+        .discount-badge.show {
+            display: block;
         }
         
         .product-info {
@@ -255,7 +266,7 @@
         }
         
         .price-current {
-            background: #ffeb3b;
+            background: var(--price-yellow);
             color: #333;
             padding: 8px 12px;
             border-radius: 6px;
@@ -266,7 +277,7 @@
         }
         
         .add-btn {
-            background: var(--primary);
+            background: var(--buy-btn);
             color: white;
             border: none;
             padding: 10px;
@@ -277,7 +288,7 @@
             transition: 0.2s;
         }
         
-        .add-btn:hover { background: #a03309; }
+        .add-btn:hover { background: #e55a00; }
         
         /* Modal */
         #modal { 
@@ -440,23 +451,24 @@
                 font-size: 13px; 
             }
             
-            /* КЛЮЧЕВОЕ: Sidebar горизонтальный с прокруткой */
+            /* Sidebar горизонтальный с прокруткой */
             .sidebar { 
-               width: 100%; 
-        height: auto; 
-        border-right: none; 
-        border-bottom: 1px solid #ddd; 
-        padding: 10px;
-        display: block; /* Меняем на block, так как скроллить будем внутренний список */
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        background: white;
+                width: 100%; 
+                height: auto; 
+                border-right: none; 
+                border-bottom: 1px solid #ddd; 
+                padding: 10px;
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                background: white;
             }
-            /* ДОБАВЬТЕ ЭТОТ БЛОК */
-    #group-list {
-        display: flex; /* Выстраивает категории в ряд */
-        gap: 8px;      /* Расстояние между категориями */
-    }
+            
+            #group-list {
+                display: flex;
+                gap: 8px;
+            }
+            
             .sidebar-item { 
                 flex-shrink: 0;
                 padding: 8px 12px;
@@ -473,6 +485,7 @@
                 color: white;
                 border-left: none;
                 padding: 8px 12px;
+                box-shadow: 0 2px 8px rgba(214, 90, 31, 0.2);
             }
             
             .content { 
@@ -510,44 +523,6 @@
                 font-size: 12px;
             }
         }
-        /* Настройки для мобильных устройств */
-@media (max-width: 600px) {
-    body {
-        flex-direction: column; /* Располагаем категории над товарами */
-    }
-
-    #categories {
-        width: 100%; /* Занимаем всю ширину экрана */
-        height: auto; /* Высота подстраивается под содержимое */
-        display: flex;
-        flex-direction: row; /* Выстраиваем категории в ряд */
-        overflow-x: auto; /* Включаем горизонтальную прокрутку */
-        white-space: nowrap; /* Запрещаем перенос текста на новую строку */
-        border-right: none;
-        border-bottom: 1px solid #dcdcdc;
-        padding: 5px 0;
-        /* Скрываем полосу прокрутки для красоты */
-        -ms-overflow-style: none;  /* IE и Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
-
-    #categories::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, Opera */
-    }
-
-    .cat-item {
-        flex: 0 0 auto; /* Элементы не сжимаются и сохраняют свой размер */
-        width: auto;
-        padding: 10px 15px;
-        font-size: 12px;
-        border-bottom: none;
-        border-right: 1px solid #f0f0f0;
-    }
-
-    #main {
-        width: 100%; /* Основная часть занимает весь экран */
-    }
-}
     </style>
 </head>
 <body>
@@ -603,12 +578,20 @@
         </div>
         <div class="modal-buttons">
             <button onclick="sendOrder()" style="width:100%; background:var(--primary); color:white; border:none; padding:14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:15px;">ОФОРМИТЬ ЗАКАЗ</button>
-            <button onclick="closeCart()" style="width:100%; background:#f5f5f5; border:1px solid #ddd; color:#666; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; font-size:15px;">Закрыть</button>
+            <button onclick="closeCart()" style="width:100%; background:#f5f5f5; border:1px solid #ddd; color:#666; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; font-size:15px;">Отменить</button>
         </div>
     </div>
 </div>
 
 <script>
+    // Иконки категорий
+    const categoryIcons = {
+        'Молочное': '🥛',
+        'Химия': '🧼',
+        'Выпечка': '🍞',
+        'Напитки': '🥤'
+    };
+
     let catalogData = [];
     let cart = {};
     let currentFilteredItems = [];
@@ -625,14 +608,18 @@
             catalogData = data.item_groups || [];
             
             const list = document.getElementById('group-list');
-            list.innerHTML = catalogData.map((g, i) => 
-                `<div class="sidebar-item" onclick="selectGroup(${i}, this)">
+            list.innerHTML = catalogData.map((g, i) => {
+                const icon = categoryIcons[g.name] || '📦';
+                return `<div class="sidebar-item ${i === 0 ? 'active' : ''}" onclick="selectGroup(${i}, this)">
+                    <span class="sidebar-icon">${icon}</span>
                     <span>${g.name}</span>
-                </div>`
-            ).join('');
+                </div>`;
+            }).join('');
             
-            // Загружаем все товары по умолчанию
-            showAllCategories({preventDefault: () => {}});
+            // Загружаем первую категорию по умолчанию
+            if (catalogData.length > 0) {
+                selectGroup(0, document.querySelector('.sidebar-item.active'));
+            }
         } catch (e) {
             document.getElementById('group-list').innerHTML = `<div style="color:red">Ошибка загрузки</div>`;
         }
@@ -662,7 +649,10 @@
     function filterProducts() {
         const q = document.getElementById('search-input').value.toLowerCase();
         if (!q) {
-            showAllCategories({preventDefault: () => {}});
+            if (document.querySelector('.sidebar-item.active')) {
+                const activeIdx = Array.from(document.querySelectorAll('.sidebar-item')).indexOf(document.querySelector('.sidebar-item.active'));
+                selectGroup(activeIdx, document.querySelector('.sidebar-item.active'));
+            }
             return;
         }
 
@@ -690,23 +680,24 @@
         const chunk = items.slice(currentCount, currentCount + 20);
 
         const html = chunk.map(item => {
-            const discount = item.discount || Math.floor(Math.random() * 50);
-            const originalPrice = Math.ceil(item.price / (1 - discount/100));
+            const discount = item.discount || 0;
+            const showDiscount = discount > 15;
+            const originalPrice = showDiscount ? Math.ceil(item.price / (1 - discount/100)) : item.price;
             
             return `
                 <div class="product-card">
                     <div class="product-image">
                         📦
-                        <div class="discount-badge">-${discount}%</div>
+                        ${showDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
                     </div>
                     <div class="product-info">
                         <div class="product-category">товар</div>
                         <div class="product-name">${item.name}</div>
                         <div class="product-price">
-                            <div class="price-old">${originalPrice} ₸</div>
+                            ${showDiscount ? `<div class="price-old">${originalPrice} ₸</div>` : ''}
                             <div class="price-current">${item.price} ₸</div>
                         </div>
-                        <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Выбрать</button>
+                        <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Купить</button>
                     </div>
                 </div>
             `;
@@ -876,14 +867,14 @@
             fio,
             phone,
             address,
-           order_items: Object.keys(cart).map(id => ({
-        object_id: parseInt(id),       // ID продукта в системе Paloma (integer)
-        name: cart[id].name,           // Название продукта (string)
-        count: cart[id].qty,           // Количество (integer)
-        price: parseFloat(cart[id].price) // Цена (number)
-    })),
-    total: document.getElementById('total-price').innerText,
-    source: "Web Catalog"
+            order_items: Object.keys(cart).map(id => ({
+                object_id: parseInt(id),
+                name: cart[id].name,
+                count: cart[id].qty,
+                price: parseFloat(cart[id].price)
+            })),
+            total: document.getElementById('total-price').innerText,
+            source: "Web Catalog"
         };
 
         try {
