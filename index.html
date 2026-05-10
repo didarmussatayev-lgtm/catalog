@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Univermag Shop</title>
+    <title>UNIVERMAG Shop</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root { 
             --primary: #D65A1F; 
+            --primary-light: #F56A42;
             --success: #22c55e; 
             --gray: #64748b;
             --light-gray: #F1F1F1;
@@ -46,6 +47,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: 2px;
         }
         
         .logo-icon { font-size: 24px; }
@@ -74,7 +76,7 @@
         }
         
         .cart-btn { 
-            background: var(--primary); 
+            background: var(--primary-light); 
             color: white; 
             border: none; 
             padding: 12px 20px; 
@@ -85,9 +87,10 @@
             align-items: center;
             gap: 8px;
             font-size: 15px;
+            transition: 0.2s;
         }
         
-        .cart-btn:hover { background: #b8480f; }
+        .cart-btn:hover { background: #e85d35; }
         
         /* Navigation */
         nav {
@@ -118,7 +121,7 @@
         .container {
             display: flex;
             gap: 0;
-            height: calc(100vh - 200px);
+            min-height: calc(100vh - 200px);
         }
         
         /* Sidebar */
@@ -126,7 +129,6 @@
             width: 200px;
             background: white;
             padding: 20px 15px;
-            height: 100%;
             overflow-y: auto;
             flex-shrink: 0;
             border-right: 1px solid #ddd;
@@ -167,8 +169,9 @@
             flex: 1;
             padding: 30px;
             overflow-y: auto;
-            height: 100%;
             background: var(--bg-light);
+            display: flex;
+            flex-direction: column;
         }
         
         .category-title {
@@ -182,6 +185,7 @@
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
             gap: 20px;
+            flex: 1;
         }
         
         .product-card {
@@ -236,15 +240,6 @@
             flex-direction: column;
         }
         
-        .product-category {
-            font-size: 12px;
-            color: var(--primary);
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
-        }
-        
         .product-name {
             font-size: 13px;
             font-weight: 600;
@@ -289,6 +284,36 @@
         }
         
         .add-btn:hover { background: #e55a00; }
+        
+        /* Scroll to top button */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 99;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(214, 90, 31, 0.3);
+        }
+        
+        .scroll-top-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-3px);
+        }
+        
+        .scroll-top-btn.show {
+            display: flex;
+        }
         
         /* Modal */
         #modal { 
@@ -349,11 +374,10 @@
         @media (max-width: 768px) {
             .container { 
                 flex-direction: column; 
-                height: auto;
+                min-height: auto;
             }
             .sidebar { 
                 width: 100%; 
-                height: auto; 
                 border-right: none; 
                 border-bottom: 1px solid #ddd; 
                 padding: 12px;
@@ -416,6 +440,13 @@
                 font-size: 20px; 
                 margin-bottom: 15px; 
             }
+            .scroll-top-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
         }
         
         /* Responsive - Мобильные */
@@ -454,7 +485,6 @@
             /* Sidebar горизонтальный с прокруткой */
             .sidebar { 
                 width: 100%; 
-                height: auto; 
                 border-right: none; 
                 border-bottom: 1px solid #ddd; 
                 padding: 10px;
@@ -522,6 +552,13 @@
                 padding: 8px;
                 font-size: 12px;
             }
+            .scroll-top-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -530,7 +567,7 @@
 <header>
     <div class="logo">
         <span class="logo-icon">≡</span>
-        <span>Univermag</span>
+        <span>UNIVERMAG</span>
     </div>
     
     <div class="search-container">
@@ -544,7 +581,7 @@
 </header>
 
 <nav>
-    <a href="#" class="nav-link active" onclick="showAllCategories(event)">Все товары</a>
+    <a href="#" class="nav-link active" onclick="showAllCategories(event)">Каталог</a>
 </nav>
 
 <div class="container">
@@ -557,6 +594,8 @@
         <div id="product-grid" class="product-grid"></div>
     </div>
 </div>
+
+<button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()">↑</button>
 
 <div id="modal">
     <div class="modal-body">
@@ -598,7 +637,26 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         loadData();
+        setupScrollToTopButton();
     });
+
+    function setupScrollToTopButton() {
+        const scrollTopBtn = document.getElementById('scroll-top-btn');
+        const contentDiv = document.querySelector('.content');
+        
+        contentDiv.addEventListener('scroll', () => {
+            if (contentDiv.scrollTop > 200) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+    }
+
+    function scrollToTop() {
+        const contentDiv = document.querySelector('.content');
+        contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     async function loadData() {
         try {
@@ -638,7 +696,7 @@
         e.preventDefault();
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         document.getElementById('search-input').value = '';
-        document.getElementById('current-category').textContent = 'Все товары';
+        document.getElementById('current-category').textContent = 'Каталог';
         let allItems = [];
         catalogData.forEach(g => {
             allItems = allItems.concat(g.items || []);
@@ -679,22 +737,22 @@
         const currentCount = grid.children.length;
         const chunk = items.slice(currentCount, currentCount + 20);
 
-        const html = chunk.map(item => {
-            const discount = item.discount || 0;
-            const showDiscount = discount > 15;
-            const originalPrice = showDiscount ? Math.ceil(item.price / (1 - discount/100)) : item.price;
+        const html = chunk.map((item, index) => {
+            // Половина товаров со скидкой (каждый второй товар)
+            const hasDiscount = index % 2 === 0;
+            const discount = hasDiscount ? 10 + Math.floor(Math.random() * 11) : 0; // От 10 до 20%
+            const markupPrice = Math.ceil(item.price * (1 + discount / 100));
             
             return `
                 <div class="product-card">
                     <div class="product-image">
                         📦
-                        ${showDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
+                        ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
                     </div>
                     <div class="product-info">
-                        <div class="product-category">товар</div>
                         <div class="product-name">${item.name}</div>
                         <div class="product-price">
-                            ${showDiscount ? `<div class="price-old">${originalPrice} ₸</div>` : ''}
+                            ${hasDiscount ? `<div class="price-old">${markupPrice} ₸</div>` : ''}
                             <div class="price-current">${item.price} ₸</div>
                         </div>
                         <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, "")}', ${item.price})">Купить</button>
