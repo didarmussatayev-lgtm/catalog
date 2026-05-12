@@ -135,34 +135,38 @@
         }
         
         .sidebar-item {
-            display: flex;
-            align-items: center;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-radius: 12px;
-            padding: 10px 15px;
-            margin: 5px;
-            flex-shrink: 0;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-            gap: 10px;
-            color: #666;
-            border: 1px solid #f0f0f0;
-        }
+    padding: 12px 8px; /* Немного уменьшили боковые отступы */
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column; /* Иконка над текстом */
+    align-items: center;    /* Центровка по горизонтали */
+    justify-content: center; /* Центровка по вертикали */
+    text-align: center;      /* Центровка самого текста */
+    min-height: 80px;        /* Чтобы все блоки были одной высоты */
+}
+        .sidebar-item span:last-child {
+    font-size: 11px;         /* Уменьшенный шрифт для длинных названий */
+    line-height: 1.2;        /* Компактный межстрочный интервал */
+    word-wrap: break-word;   /* Разрешаем перенос длинных слов */
+    display: block;
+    width: 100%;             /* Чтобы текст занимал всю ширину колонки */
+    font-weight: 500;
+    margin-top: 5px;         /* Отступ от иконки */
+}
         
-        .sidebar-item:hover { 
-            background: #f8f8f8;
-            color: #333;
-        }
+   .sidebar-item:hover {
+    background: #fff7ed;
+    color: var(--primary);
+}
         
-        .sidebar-item.active { 
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            border: none;
-            box-shadow: 0 4px 12px rgba(214, 90, 31, 0.3);
-        }
+      .sidebar-item.active {
+    background: #fff7ed;
+    color: var(--primary);
+    border-right: 3px solid var(--primary);
+    font-weight: bold;
+}
         
         .sidebar-icon { 
             font-size: 24px;
