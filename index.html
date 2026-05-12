@@ -477,10 +477,10 @@
         }
         
         /* Responsive - Мобильные */
-       /* Responsive - Мобильные */
+     
         @media (max-width: 600px) {
-            .container {
-                height: auto;
+            .container { height: auto; }
+            header { padding: 12px 15px; flex-wrap: wrap; gap: 8px; }
             }
             header { 
                 padding: 12px 15px; 
@@ -514,68 +514,38 @@
             }
             
             /* Sidebar горизонтальный с прокруткой */
-            .sidebar { 
-                width: 100%; 
-                border-right: none; 
-                border-bottom: 1px solid #ddd; 
-                padding: 5px 0;
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+          .sidebar { 
+                width: 100% !important; 
+                display: block !important;
+                overflow-x: auto !important;
                 background: white;
                 position: sticky;
                 top: 0;
                 z-index: 40;
+                padding: 5px 0;
             }
             
-            #group-list {
-                display: flex;
-                flex-wrap: nowrap;
-                gap: 6px;
-                padding: 5px 10px;
-                width: max-content; /* Позволяет списку тянуться вправо для скролла */
+           #group-list {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 6px !important;
+                padding: 5px 10px !important;
+                width: max-content !important;
             }
-            
             .sidebar-item {
-                /* Жесткая ширина: 22% от экрана (22vw), чтобы 4 штуки влезли с учетом отступов */
-                flex: 0 0 22vw; 
-                
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                text-align: center;
-                
-                background: #ffffff;
-                border-radius: 10px;
+                flex: 0 0 22vw !important; /* Ровно 1/4 экрана */
+                height: 90px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: white;
                 border: 1px solid #eee;
-                padding: 8px 2px;
-                
-                /* Одинаковая высота для всех плиток */
-                height: 90px; 
-                margin-bottom: 0;
+                border-radius: 10px;
             }
 
-            /* Иконка */
-            .sidebar-item span:first-child {
-                font-size: 24px !important; 
-                margin-bottom: 4px;
-                margin-right: 0 !important;
-                display: block;
-            }
-
-            /* Текст категории */
-            .sidebar-item span:last-child {
-                font-size: 8px !important; 
-                line-height: 1.1;
-                font-weight: 700;
-                text-transform: uppercase;
-                white-space: normal !important; 
-                word-wrap: break-word;
-                display: block;
-                width: 100%;
-                padding: 0 2px;
-            }
+           .sidebar-item span:first-child { font-size: 24px !important; margin: 0 0 4px 0 !important; }
+            .sidebar-item span:last-child { font-size: 8px !important; line-height: 1.1; white-space: normal !important; font-weight: 700; text-transform: uppercase; }
             
             .sidebar-item.active {
                 background: #fff7ed;
@@ -589,33 +559,33 @@
             }
 
             /* ТОВАРЫ: исправляем на 2 в ряд */
+           #main { width: 100% !important; }
+            
             #product-list { 
                 display: grid !important;
-                grid-template-columns: repeat(2, 1fr) !important; 
+                /* Две колонки по 50% */
+                grid-template-columns: 1fr 1fr !important; 
                 gap: 10px !important;
+                padding: 10px !important;
                 width: 100% !important;
-            }
 
-            .product-card { 
-                border-radius: 12px;
-                height: auto;
-                width: 100% !important;
+           .product-card { 
+                width: 100% !important; /* Убираем любые фиксы ширины */
+                max-width: none !important;
                 margin: 0 !important;
-                display: flex;
-                flex-direction: column;
+                display: flex !important;
+                flex-direction: column !important;
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #eee;
+                height: 100% !important; /* Чтобы карточки в ряду были одной высоты */
             }
 
-            .product-image { 
-                height: 120px; 
-                font-size: 40px; 
-            }
+            .product-image { height: 110px !important; font-size: 35px !important; }
             .product-info { 
                 padding: 10px; 
             }
-            .product-name { 
-                font-size: 13px; 
-                height: 32px; /* Ограничиваем высоту названия */
-                overflow: hidden;
+            .product-name { font-size: 12px !important; height: 34px; overflow: hidden; }
             }
             .price-current {
                 font-size: 14px;
