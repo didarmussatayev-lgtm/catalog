@@ -521,30 +521,56 @@
                 background: white;
             }
             
-            #group-list {
-                display: flex;
-                gap: 8px;
-            }
+           #group-list {
+        display: flex;
+        flex-wrap: nowrap; /* Оставляем в одну линию для скролла */
+        gap: 4px;          /* Минимальный зазор между плитками */
+        padding: 8px 4px;
+        width: 100%;
+    }
             
-            .sidebar-item { 
-                flex-shrink: 0;
-                padding: 8px 12px;
-                margin: 0;
-                font-size: 12px;
-                white-space: nowrap;
-                background: white;
-                border-radius: 6px;
-                border-left: none;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            }
-            
-            .sidebar-item.active { 
-                background: var(--primary);
-                color: white;
-                border-left: none;
-                padding: 8px 12px;
-                box-shadow: 0 2px 8px rgba(214, 90, 31, 0.2);
-            }
+          .sidebar-item {
+        /* Рассчитываем ширину так, чтобы влезло ровно 4 штуки */
+        flex: 0 0 calc(25% - 6px); 
+        
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Иконка всегда сверху */
+        text-align: center;
+        
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        padding: 8px 2px;
+        min-height: 85px; /* Фиксированная высота для ровного ряда */
+    }
+            /* Стандартный размер иконки */
+    .sidebar-item span:first-child {
+        font-size: 28px; 
+        margin-bottom: 5px;
+        display: block;
+    }
+        /* Настройка текста */
+    .sidebar-item span:last-child {
+        font-size: 8px;      /* Маленький шрифт, чтобы влезло больше букв */
+        line-height: 1.1;
+        font-weight: 600;
+        text-transform: uppercase;
+        
+        /* Разрешаем перенос на несколько строк */
+        white-space: normal; 
+        word-wrap: break-word;
+        display: block;
+        width: 100%;
+        padding: 0 2px;
+    }    
+           .sidebar-item.active {
+        background: #fff7ed;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+}
             
             .content { 
                 height: auto; 
