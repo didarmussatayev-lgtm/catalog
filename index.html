@@ -196,24 +196,24 @@
         }
         
         .product-grid { 
-            display: grid;
-    /* Автоматически создает колонки шириной минимум 180px */
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-    gap: 15px;
-    padding: 15px;
-    width: 100%;
+            display: grid !important;
+    /* На компьютере: карточки минимум 200px, заполняют всё пространство */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: 20px !important;
+    padding: 20px !important;
+    width: 100% !important;
+    align-content: start;
         }
         
         .product-card {
-           background: white;
-    border-radius: 12px;
-    padding: 12px;
+          width: auto !important; /* Убираем фиксированную ширину */
+    flex: none !important;  /* Отключаем флекс-поведение, так как работаем в сетке */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
     border: 1px solid #eee;
-    /* Убедитесь, что здесь НЕТ свойства flex: 0 0 25% */
         }
         
         .product-card:hover {
@@ -477,6 +477,7 @@
         }
         
         /* Responsive - Мобильные */
+       /* Responsive - Мобильные */
         @media (max-width: 600px) {
             .container {
                 height: auto;
@@ -517,101 +518,115 @@
                 width: 100%; 
                 border-right: none; 
                 border-bottom: 1px solid #ddd; 
-                padding: 10px;
+                padding: 5px 0;
                 display: block;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 background: white;
+                position: sticky;
+                top: 0;
+                z-index: 40;
             }
             
-           #group-list {
-        display: flex;
-        flex-wrap: nowrap; /* Оставляем в одну линию для скролла */
-        gap: 4px;          /* Минимальный зазор между плитками */
-        padding: 8px 4px;
-        width: 100%;
-    }
+            #group-list {
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 6px;
+                padding: 5px 10px;
+                width: max-content; /* Позволяет списку тянуться вправо для скролла */
+            }
             
-          .sidebar-item {
-        /* Рассчитываем ширину так, чтобы влезло ровно 4 штуки */
-        flex: 0 0 calc(25% - 6px); 
-        
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start; /* Иконка всегда сверху */
-        text-align: center;
-        
-        background: #ffffff;
-        border-radius: 10px;
-        border: 1px solid #eee;
-        padding: 8px 2px;
-        min-height: 85px; /* Фиксированная высота для ровного ряда */
-    }
-            /* Стандартный размер иконки */
-    .sidebar-item span:first-child {
-        font-size: 28px; 
-        margin-bottom: 5px;
-        display: block;
-    }
-        /* Настройка текста */
-    .sidebar-item span:last-child {
-        font-size: 8px;      /* Маленький шрифт, чтобы влезло больше букв */
-        line-height: 1.1;
-        font-weight: 600;
-        text-transform: uppercase;
-        
-        /* Разрешаем перенос на несколько строк */
-        white-space: normal; 
-        word-wrap: break-word;
-        display: block;
-        width: 100%;
-        padding: 0 2px;
-    }    
-           .sidebar-item.active {
-        background: #fff7ed;
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-}
+            .sidebar-item {
+                /* Жесткая ширина: 22% от экрана (22vw), чтобы 4 штуки влезли с учетом отступов */
+                flex: 0 0 22vw; 
+                
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                text-align: center;
+                
+                background: #ffffff;
+                border-radius: 10px;
+                border: 1px solid #eee;
+                padding: 8px 2px;
+                
+                /* Одинаковая высота для всех плиток */
+                height: 90px; 
+                margin-bottom: 0;
+            }
+
+            /* Иконка */
+            .sidebar-item span:first-child {
+                font-size: 24px !important; 
+                margin-bottom: 4px;
+                margin-right: 0 !important;
+                display: block;
+            }
+
+            /* Текст категории */
+            .sidebar-item span:last-child {
+                font-size: 8px !important; 
+                line-height: 1.1;
+                font-weight: 700;
+                text-transform: uppercase;
+                white-space: normal !important; 
+                word-wrap: break-word;
+                display: block;
+                width: 100%;
+                padding: 0 2px;
+            }
+            
+            .sidebar-item.active {
+                background: #fff7ed;
+                border-color: var(--primary);
+                color: var(--primary);
+            }
             
             .content { 
                 height: auto; 
                 padding: 12px; 
             }
-            .content-header {
-                margin-bottom: 12px;
+
+            /* ТОВАРЫ: исправляем на 2 в ряд */
+            #product-list { 
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 10px !important;
+                width: 100% !important;
             }
-            .product-grid { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 10px; 
-            }
+
             .product-card { 
-                border-radius: 8px;
+                border-radius: 12px;
                 height: auto;
+                width: 100% !important;
+                margin: 0 !important;
+                display: flex;
+                flex-direction: column;
             }
+
             .product-image { 
-                height: 100px; 
-                font-size: 30px; 
+                height: 120px; 
+                font-size: 40px; 
             }
             .product-info { 
-                padding: 8px; 
+                padding: 10px; 
             }
             .product-name { 
-                font-size: 12px; 
-                margin-bottom: 8px;
-            }
-            .category-title { 
-                font-size: 18px; 
+                font-size: 13px; 
+                height: 32px; /* Ограничиваем высоту названия */
+                overflow: hidden;
             }
             .price-current {
                 font-size: 14px;
-                padding: 6px 10px;
+                width: 100%;
+                text-align: center;
             }
             .add-btn {
-                padding: 8px;
-                font-size: 12px;
+                width: 100%;
+                margin-top: 8px;
             }
+        
             .scroll-top-btn {
                 bottom: 15px;
                 right: 15px;
