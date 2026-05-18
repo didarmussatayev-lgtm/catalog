@@ -162,6 +162,7 @@
             line-height: 1.25;
             word-break: normal;
             overflow-wrap: break-word;
+            hyphens: none;
             display: block;
             width: 100%;
             font-weight: 600;
@@ -424,11 +425,9 @@
                 display: flex;
                 flex-direction: row;
                 gap: 6px;
-                /* width = 4 tiles + 3 gaps visible at once */
                 width: max-content;
             }
             .sidebar-item {
-                /* Always show exactly 4 tiles */
                 width: calc((100vw - 24px - 18px) / 4);
                 min-width: 0;
                 flex-shrink: 0;
@@ -441,11 +440,11 @@
                 padding: 8px 4px;
             }
             .sidebar-item span:last-child {
-                /* Scale font with tile width so words fit without mid-word breaks */
                 font-size: clamp(7.5px, 2.15vw, 10px);
                 line-height: 1.25;
                 word-break: normal;
                 overflow-wrap: break-word;
+                hyphens: none;
                 white-space: normal;
                 font-weight: 600;
                 text-transform: uppercase;
@@ -636,6 +635,16 @@
     let cart = {};
     let currentFilteredItems = [];
 
+    /**
+     * Вставляет неразрывный пробел (\u00A0) после каротких слов (≤ 4 символов),
+     * чтобы предлоги, союзы и короткие слова не оставались одни на строке.
+     * Например: "ТОВАРЫ ДЛЯ ПРАЗДНИКА" → "ТОВАРЫ ДЛЯ\u00A0ПРАЗДНИКА"
+     */
+    function glueShortWords(text) {
+        // Заменяем обычный пробел на неразрывный, если ПЕРЕД пробелом стоит слово ≤ 4 символов
+        return text.replace(/(\S{1,4}) /g, '$1\u00A0');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         loadData();
         setupScrollToTopButton();
@@ -669,9 +678,10 @@
             const list = document.getElementById('group-list');
             list.innerHTML = catalogData.map((g, i) => {
                 const icon = categoryIcons[g.name] || '📦';
+                const label = glueShortWords(g.name);
                 return `<div class="sidebar-item ${i === 0 ? 'active' : ''}" onclick="selectGroup(${i}, this)">
                     <span class="sidebar-icon">${icon}</span>
-                    <span>${g.name}</span>
+                    <span>${label}</span>
                 </div>`;
             }).join('');
             
