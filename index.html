@@ -427,7 +427,7 @@
                 width: max-content;
             }
             .sidebar-item {
-                /* Exactly 4 tiles visible: (100vw - 24px sidebar padding - 3*8px gaps) / 4 */
+                /* Exactly 4 tiles visible at once */
                 width: calc((100vw - 24px - 24px) / 4);
                 min-width: 0;
                 flex-shrink: 0;
@@ -441,9 +441,12 @@
             }
             .sidebar-item span:last-child {
                 font-size: 10px;
-                word-break: normal;
-                overflow-wrap: break-word;
+                line-height: 1.2;
+                /* Only break at spaces — never mid-word */
+                word-break: keep-all;
+                overflow-wrap: normal;
                 white-space: normal;
+                overflow: hidden;
             }
             .sidebar-icon {
                 font-size: 22px;
