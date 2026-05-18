@@ -105,9 +105,12 @@
             color: #333;
             text-decoration: none;
             font-size: 15px;
+            font-weight: 700;
             border-bottom: 3px solid transparent;
             transition: 0.2s;
             white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         nav a:hover { color: var(--primary); }
@@ -124,17 +127,17 @@
         }
         
         .sidebar {
-            width: 220px;
+            width: 280px;
             background: white;
-            padding: 20px 15px;
+            padding: 16px 12px;
             overflow-y: auto;
             flex-shrink: 0;
             border-right: 1px solid #ddd;
         }
 
         #group-list {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
         
@@ -142,24 +145,28 @@
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            text-align: left;
-            min-height: 64px;
-            padding: 12px 14px;
+            justify-content: flex-start;
+            gap: 6px;
+            text-align: center;
+            min-height: 90px;
+            padding: 10px 8px;
             background: white;
             border: 1px solid #ececec;
             border-radius: 14px;
         }
 
         .sidebar-item span:last-child {
-            font-size: 14px;
+            font-size: 11px;
             line-height: 1.25;
-            word-break: break-word;
+            word-break: normal;
+            overflow-wrap: break-word;
             display: block;
             width: 100%;
-            font-weight: 500;
+            font-weight: 600;
             margin-top: 0;
+            text-transform: uppercase;
         }
         
         .sidebar-item:hover {
@@ -176,7 +183,7 @@
         }
         
         .sidebar-icon { 
-            font-size: 24px;
+            font-size: 26px;
             flex-shrink: 0;
         }
         
@@ -199,6 +206,7 @@
             font-weight: 700;
             color: #333;
             margin: 0;
+            text-transform: uppercase;
         }
         
         .product-grid { 
@@ -413,6 +421,7 @@
                 -webkit-overflow-scrolling: touch;
             }
             #group-list {
+                display: flex;
                 flex-direction: row;
                 width: max-content;
                 gap: 8px;
@@ -421,12 +430,12 @@
                 flex-direction: column;
                 justify-content: center;
                 text-align: center;
-                width: 145px;
-                min-height: 94px;
+                width: 100px;
+                min-height: 90px;
                 gap: 6px;
             }
             .sidebar-item span:last-child {
-                font-size: 11px;
+                font-size: 10px;
             }
             .content { 
                 height: auto; 
@@ -547,7 +556,7 @@
             <div class="error-msg" id="error-address">Пожалуйста, введите адрес</div>
         </div>
         <div class="modal-buttons">
-            <button onclick="sendOrder()" style="width:100%; background:var(--primary); color:white; border:none; padding:14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:15px;">Отправить заказ</button>
+            <button onclick="sendOrder()" style="width:100%; background:var(--primary); color:white; border:none; padding:14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:15px;">Оформить заказ</button>
             <button onclick="closeCart()" style="width:100%; background:#f5f5f5; border:1px solid #ddd; color:#666; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; font-size:15px;">Закрыть</button>
         </div>
     </div>
