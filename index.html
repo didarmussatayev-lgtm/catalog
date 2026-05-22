@@ -642,6 +642,36 @@
         "Незаданные": "📦"
     };
 
+    // Приоритеты групп: 0 — продукты питания, 1 — напитки, 2 — детские,
+    // 3 — средства гигиены, 4 — бытовая химия, 99 — всё остальное
+    const FOOD_KEYWORDS = [
+        "КОНСЕРВЫ", "бакалея", "КОНДИТЕРСКИЕ ИЗДЕЛИЯ", "ГАСТРОНОМИЯ",
+        "ЗАМОРОЖЕННЫЕ ПРОДУКТЫ", "МОЛОЧНЫЕ ПРОДУКТЫ", "молочка",
+        "ЧАЙ, КОФЕ, КАКАО", "ХЛЕБОБУЛОЧНЫЕ ИЗДЕЛИЯ", "ПЕКАРНЯ",
+        "хлебобуоч изд", "печенье", "макаронные изделия", "КУЛИНАРИЯ",
+        "Сухофрукты", "масло", "ОВОЩИ, ФРУКТЫ, ЯГОДЫ, ГРИБЫ СВЕЖИЕ",
+        "ХОЗЯЙСТВЕННЫЕ ТОВАРЫ"
+    ];
+    const DRINK_KEYWORDS = [
+        "БЕЗАЛКОГОЛЬНЫЕ НАПИТКИ", "ПИВО, СЛАБОАЛКОГОЛЬНЫЕ НАПИТКИ",
+        "КРЕПКИЙ АЛКОГОЛЬ", "ВИНО"
+    ];
+    const KIDS_KEYWORDS = [
+        "ДЕТСКОЕ ПИТАНИЕ, СРЕДСТВА ДЛЯ КОРМЛЕНИЯ", "ТОВАРЫ ДЛЯ ДЕТЕЙ", "игрушки"
+    ];
+    const HYGIENE_KEYWORDS = ["СРЕДСТВА ГИГИЕНЫ"];
+    const CHEM_KEYWORDS = ["БЫТОВАЯ ХИМИЯ"];
+
+    function getCategoryPriority(name) {
+        const upper = name.toUpperCase();
+        if (FOOD_KEYWORDS.some(k => k.toUpperCase() === upper)) return 0;
+        if (DRINK_KEYWORDS.some(k => k.toUpperCase() === upper)) return 1;
+        if (KIDS_KEYWORDS.some(k => k.toUpperCase() === upper)) return 2;
+        if (HYGIENE_KEYWORDS.some(k => k.toUpperCase() === upper)) return 3;
+        if (CHEM_KEYWORDS.some(k => k.toUpperCase() === upper)) return 4;
+        return 99;
+    }
+
     let catalogData = [];
     let cart = {};
     let currentFilteredItems = [];
@@ -675,6 +705,9 @@
             if (!res.ok) throw new Error('Файл не найден');
             const data = await res.json();
             catalogData = data.item_groups || [];
+
+            // Сортировка: продукты → напитки → детские → гигиена → химия → остальное
+            catalogData.sort((a, b) => getCategoryPriority(a.name) - getCategoryPriority(b.name));
             
             const list = document.getElementById('group-list');
             list.innerHTML = catalogData.map((g, i) => {
