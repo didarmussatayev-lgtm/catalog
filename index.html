@@ -242,7 +242,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 50px;
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
@@ -253,11 +252,6 @@
             height: 100%;
             object-fit: contain;
             display: block;
-        }
-
-        .product-image .img-fallback {
-            font-size: 50px;
-            line-height: 1;
         }
         
         .discount-badge {
@@ -506,10 +500,6 @@
             }
             .product-image { 
                 height: 130px; 
-                font-size: 38px; 
-            }
-            .product-image .img-fallback {
-                font-size: 38px;
             }
             .category-title { 
                 font-size: 22px; 
@@ -599,6 +589,8 @@
 </div>
 
 <script>
+    const PLACEHOLDER_IMG = 'https://drive.google.com/thumbnail?id=1wSCyIb7S4soqmoFLo42Sh_z65HXLTPHM&sz=w400-h400';
+
     const categoryIcons = {
         "БЫТОВАЯ ХИМИЯ": "🧼",
         "СРЕДСТВА ГИГИЕНЫ": "🧻",
@@ -675,38 +667,6 @@
     function scrollToTop() {
         const contentDiv = document.querySelector('.content');
         contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /**
-     * Конвертирует ссылку Google Drive в прямой thumbnail-URL.
-     * Поддерживает форматы:
-     *   https://drive.google.com/uc?export=view&id=FILE_ID
-     *   https://drive.google.com/file/d/FILE_ID/view
-     *   https://drive.google.com/open?id=FILE_ID
-     */
-    function getDriveImageUrl(url) {
-        if (!url) return null;
-
-        // Извлекаем FILE_ID из любого формата Google Drive URL
-        let fileId = null;
-
-        // Формат: ?id=FILE_ID или &id=FILE_ID
-        const idParam = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (idParam) fileId = idParam[1];
-
-        // Формат: /file/d/FILE_ID/
-        if (!fileId) {
-            const fileD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (fileD) fileId = fileD[1];
-        }
-
-        if (fileId) {
-            // thumbnail API — надёжно работает без авторизации для публичных файлов
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h400`;
-        }
-
-        // Не Google Drive — вернуть как есть
-        return url;
     }
 
     async function loadData() {
@@ -791,25 +751,12 @@
             const hasDiscount = Math.random() < 0.5;
             const discount = hasDiscount ? 10 + Math.floor(Math.random() * 11) : 0;
             const markupPrice = Math.ceil(item.price * (1 + discount / 100));
-
-            // Конвертируем Google Drive ссылку в thumbnail URL
-            const imgUrl = getDriveImageUrl(item.image);
             const altText = item.name.replace(/"/g, '&quot;');
 
-            const imageBlock = imgUrl
-                ? `<img
-                        src="${imgUrl}"
-                        alt="${altText}"
-                        loading="lazy"
-                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                   >
-                   <span class="img-fallback" style="display:none;">📦</span>`
-                : `<span class="img-fallback">📦</span>`;
-            
             return `
                 <div class="product-card">
                     <div class="product-image">
-                        ${imageBlock}
+                        <img src="${PLACEHOLDER_IMG}" alt="${altText}" loading="lazy">
                         ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
                     </div>
                     <div class="product-info">
