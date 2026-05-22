@@ -666,7 +666,7 @@
 
     async function loadData() {
         try {
-            const res = await fetch('univermag 06-05-2026.json');
+            const res = await fetch('univermag_converted.json');
             if (!res.ok) throw new Error('Файл не найден');
             const data = await res.json();
             catalogData = data.item_groups || [];
