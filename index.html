@@ -677,6 +677,38 @@
         contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    /**
+     * Конвертирует ссылку Google Drive в прямой thumbnail-URL.
+     * Поддерживает форматы:
+     *   https://drive.google.com/uc?export=view&id=FILE_ID
+     *   https://drive.google.com/file/d/FILE_ID/view
+     *   https://drive.google.com/open?id=FILE_ID
+     */
+    function getDriveImageUrl(url) {
+        if (!url) return null;
+
+        // Извлекаем FILE_ID из любого формата Google Drive URL
+        let fileId = null;
+
+        // Формат: ?id=FILE_ID или &id=FILE_ID
+        const idParam = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (idParam) fileId = idParam[1];
+
+        // Формат: /file/d/FILE_ID/
+        if (!fileId) {
+            const fileD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (fileD) fileId = fileD[1];
+        }
+
+        if (fileId) {
+            // thumbnail API — надёжно работает без авторизации для публичных файлов
+            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h400`;
+        }
+
+        // Не Google Drive — вернуть как есть
+        return url;
+    }
+
     async function loadData() {
         try {
             const res = await fetch('univermag_converted.json');
@@ -760,11 +792,14 @@
             const discount = hasDiscount ? 10 + Math.floor(Math.random() * 11) : 0;
             const markupPrice = Math.ceil(item.price * (1 + discount / 100));
 
-            // Формируем блок с картинкой или эмодзи-заглушкой
-            const imageBlock = item.image
+            // Конвертируем Google Drive ссылку в thumbnail URL
+            const imgUrl = getDriveImageUrl(item.image);
+            const altText = item.name.replace(/"/g, '&quot;');
+
+            const imageBlock = imgUrl
                 ? `<img
-                        src="${item.image}"
-                        alt="${item.name.replace(/"/g, '&quot;')}"
+                        src="${imgUrl}"
+                        alt="${altText}"
                         loading="lazy"
                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                    >
