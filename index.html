@@ -789,8 +789,11 @@
             return `
                 <div class="product-card">
                     <div class="product-image">
-                        <img src="${PLACEHOLDER_IMG}" alt="${altText}" loading="lazy">
-                        ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
+                    <img src="${item.image || PLACEHOLDER_IMG}" 
+     alt="${altText}" 
+     loading="lazy"
+     onerror="this.src='${PLACEHOLDER_IMG}'">
+                       ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
                     </div>
                     <div class="product-info">
                         <div class="product-name">${item.name}</div>
