@@ -591,6 +591,16 @@
 <script>
     const PLACEHOLDER_IMG = 'https://drive.google.com/thumbnail?id=1wSCyIb7S4soqmoFLo42Sh_z65HXLTPHM&sz=w400-h400';
 
+    // Конвертирует ссылку Google Drive /file/d/ID/view → thumbnail URL
+    function convertDriveLink(url) {
+        if (!url) return PLACEHOLDER_IMG;
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+            return 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w400-h400';
+        }
+        return url;
+    }
+
     const categoryIcons = {
         "БЫТОВАЯ ХИМИЯ": "🧼",
         "СРЕДСТВА ГИГИЕНЫ": "🧻",
@@ -642,8 +652,6 @@
         "Незаданные": "📦"
     };
 
-    // Приоритеты групп: 0 — продукты питания, 1 — напитки, 2 — детские,
-    // 3 — средства гигиены, 4 — бытовая химия, 99 — всё остальное
     const FOOD_KEYWORDS = [
         "КОНСЕРВЫ", "бакалея", "КОНДИТЕРСКИЕ ИЗДЕЛИЯ", "ГАСТРОНОМИЯ",
         "ЗАМОРОЖЕННЫЕ ПРОДУКТЫ", "МОЛОЧНЫЕ ПРОДУКТЫ", "молочка",
@@ -706,7 +714,6 @@
             const data = await res.json();
             catalogData = data.item_groups || [];
 
-            // Сортировка: продукты → напитки → детские → гигиена → химия → остальное
             catalogData.sort((a, b) => getCategoryPriority(a.name) - getCategoryPriority(b.name));
             
             const list = document.getElementById('group-list');
@@ -785,15 +792,16 @@
             const discount = hasDiscount ? 10 + Math.floor(Math.random() * 11) : 0;
             const markupPrice = Math.ceil(item.price * (1 + discount / 100));
             const altText = item.name.replace(/"/g, '&quot;');
+            const imgSrc = convertDriveLink(item.image);
 
             return `
                 <div class="product-card">
                     <div class="product-image">
-                    <img src="${item.image || PLACEHOLDER_IMG}" 
-     alt="${altText}" 
-     loading="lazy"
-     onerror="this.src='${PLACEHOLDER_IMG}'">
-                       ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
+                        <img src="${imgSrc}"
+                             alt="${altText}"
+                             loading="lazy"
+                             onerror="this.src='${PLACEHOLDER_IMG}'">
+                        ${hasDiscount ? `<div class="discount-badge show">-${discount}%</div>` : ''}
                     </div>
                     <div class="product-info">
                         <div class="product-name">${item.name}</div>
