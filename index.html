@@ -794,6 +794,10 @@
             const altText = item.name.replace(/"/g, '&quot;');
             const imgSrc = convertDriveLink(item.image);
 
+            // БЕЗОПАСНАЯ ОЧИСТКА ТЕКСТА ДЛЯ ONCLICK:
+            // Удаляем любые кавычки (одинарные и двойные) и обратные слэши, чтобы не ломать HTML-атрибут
+            const safeName = item.name.replace(/['"/]/g, ' ');
+
             return `
                 <div class="product-card">
                     <div class="product-image">
@@ -809,7 +813,7 @@
                             ${hasDiscount ? `<div class="price-old">${markupPrice} ₸</div>` : ''}
                             <div class="price-current">${item.price} ₸</div>
                         </div>
-                        <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${item.name.replace(/'/g, '')}', ${item.price})">Купить</button>
+                        <button class="add-btn" onclick="animateFly(this, '${item.object_id}', '${safeName}', ${item.price})">Купить</button>
                     </div>
                 </div>
             `;
