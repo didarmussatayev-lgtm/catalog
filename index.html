@@ -964,7 +964,7 @@
         document.getElementById('modal').style.display = 'none';
     }
 
-  async function sendOrder() {
+async function sendOrder() {
         if (Object.keys(cart).length === 0) {
             alert('Корзина пуста');
             return;
@@ -974,25 +974,30 @@
             return;
         }
 
+        // Передаем window.event, чтобы кнопка корректно блокировалась при нажатии
+        const currentEvent = window.event;
+        const btn = currentEvent ? currentEvent.target : null;
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "ОТПРАВЛЯЕМ...";
+        }
+
         const fio = document.getElementById('user_fio').value;
         const phone = document.getElementById('user_phone').value;
         const address = document.getElementById('user_address').value;
-
-        const btn = event.target;
-        btn.disabled = true;
-        btn.innerText = "ОТПРАВЛЯЕМ...";
 
         const orderData = {
             fio,
             phone,
             address,
             order_items: Object.keys(cart).map(id => ({
-                object_id: parseInt(id),
+                object_id: parseInt(id) || id,
                 name: cart[id].name,
                 count: cart[id].qty,
                 price: parseFloat(cart[id].price)
             })),
-            total: document.getElementById('total-price').innerText,
+            total: parseInt(document.getElementById('total-price').innerText),
             source: "Web Catalog"
         };
 
@@ -1003,8 +1008,11 @@
                 body: JSON.stringify(orderData)
             });
             
+            // Если сервер вернул статус 200-299
             if (response.ok) {
-                alert("Заказ успешно принят!");
+                alert("заказ принят");
+                
+                // Очищаем корзину и форму
                 cart = {};
                 updateUI();
                 document.getElementById('user_fio').value = '';
@@ -1012,13 +1020,18 @@
                 document.getElementById('user_address').value = '';
                 closeCart();
             } else {
-                throw new Error();
+                // Если сервер ответил, но статус плохой (например, 500 или 404)
+                alert("ошибка");
             }
         } catch (e) {
-            alert("Ошибка при отправке. Попробуйте еще раз.");
+            // Если упала сеть, заблокирован CORS или упал сервер
+            console.error(e);
+            alert("ошибка");
         } finally {
-            btn.disabled = false;
-            btn.innerText = "ОФОРМИТЬ ЗАКАЗ";
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "ОФОРМИТЬ ЗАКАЗ";
+            }
         }
     }
 
