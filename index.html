@@ -964,18 +964,62 @@
         document.getElementById('modal').style.display = 'none';
     }
 
-    async function sendOrder() {
+  async function sendOrder() {
         if (Object.keys(cart).length === 0) {
             alert('Корзина пуста');
             return;
         }
+        
+        if (!validateFields()) {
+            return;
+        }
 
-        if (!validateFields()) return;
+        const fio = document.getElementById('user_fio').value;
+        const phone = document.getElementById('user_phone').value;
+        const address = document.getElementById('user_address').value;
 
-        alert('Заказ отправлен');
-        cart = {};
-        updateUI();
-        closeCart();
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "ОТПРАВЛЯЕМ...";
+
+        const orderData = {
+            fio,
+            phone,
+            address,
+            order_items: Object.keys(cart).map(id => ({
+                object_id: parseInt(id),
+                name: cart[id].name,
+                count: cart[id].qty,
+                price: parseFloat(cart[id].price)
+            })),
+            total: document.getElementById('total-price').innerText,
+            source: "Web Catalog"
+        };
+
+        try {
+            const response = await fetch('https://primary-production-7f078.up.railway.app/webhook-test/univermag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+            
+            if (response.ok) {
+                alert("Заказ успешно принят!");
+                cart = {};
+                updateUI();
+                document.getElementById('user_fio').value = '';
+                document.getElementById('user_phone').value = '';
+                document.getElementById('user_address').value = '';
+                closeCart();
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            alert("Ошибка при отправке. Попробуйте еще раз.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "ОФОРМИТЬ ЗАКАЗ";
+        }
     }
 
     updateUI();
