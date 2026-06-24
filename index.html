@@ -709,7 +709,7 @@
 
     async function loadData() {
         try {
-            const res = await fetch('univermag_converted.json');
+            const res = await fetch('univermag_compact.json');
             if (!res.ok) throw new Error('Файл не найден');
             const data = await res.json();
             catalogData = data.item_groups || [];
